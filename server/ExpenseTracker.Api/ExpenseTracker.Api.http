@@ -1,0 +1,21 @@
+@ExpenseTracker.Api_HostAddress = http://localhost:5001
+
+POST {{ExpenseTracker.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin1234!"
+}
+
+###
+
+POST {{ExpenseTracker.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin1234!"
+}
+
+###
