@@ -107,6 +107,26 @@ Three-agent model in a single Copilot Chat session:
 
 ---
 
+### Step 11 — Expenses UI
+**Agent:** UI Developer
+**Prompt:**
+> Implement DashboardPage (expense list, total, category filter, delete, links to add/edit) and ExpenseFormPage (add/edit form with amount, description, date, category select).
+
+**Result:** Dashboard with full expense table, color-coded category badges, total sum, filter, delete confirmation. ExpenseFormPage detects add vs edit mode from URL param.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 12 — Navigation + Admin UI
+**Agent:** UI Developer
+**Prompt:**
+> Implement MainLayout (navbar + logout + Admin link for admins), AdminLayout (sidebar), CategoriesPage (table + delete + nav), CategoryFormPage (add/edit with color picker).
+
+**Result:** Full navigation with role-based Admin link, logout, admin category management with color swatches and color picker.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
 <!-- New steps will be added here by the Product Owner agent -->
 
 ---

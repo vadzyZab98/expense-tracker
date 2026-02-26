@@ -31,22 +31,22 @@ You are the **Product Owner** for the Expense Tracker project. You think in term
 | User can register an account | ✅ working |
 | User can log in and receive a token | ✅ working |
 | Unauthenticated users are redirected to login | ✅ working |
-| User can view their expense list | 🔧 API ready, UI pending |
-| User can add a new expense | 🔧 API ready, UI pending |
-| User can edit an existing expense | 🔧 API ready, UI pending |
-| User can delete an expense | 🔧 API ready, UI pending |
-| User can filter expenses by category | 🔧 API ready, UI pending |
-| User can navigate the app via a top menu | ⚙️ not working |
-| User can log out | ⚙️ not working |
+| User can view their expense list | ✅ working |
+| User can add a new expense | ✅ working |
+| User can edit an existing expense | ✅ working |
+| User can delete an expense | ✅ working |
+| User can filter expenses by category | ✅ working |
+| User can navigate the app via a top menu | ✅ working |
+| User can log out | ✅ working |
 
 ### Admin capabilities
 
 | Feature | Status |
 |---------|--------|
-| Admin can view the categories list | 🔧 API ready, UI pending |
-| Admin can add a new category | 🔧 API ready, UI pending |
-| Admin can edit a category | 🔧 API ready, UI pending |
-| Admin can delete a category | 🔧 API ready, UI pending |
+| Admin can view the categories list | ✅ working |
+| Admin can add a new category | ✅ working |
+| Admin can edit a category | ✅ working |
+| Admin can delete a category | ✅ working |
 | Non-admin users cannot access admin area | ✅ working |
 
 ---
@@ -87,10 +87,9 @@ When a feature works end-to-end:
 
 ## Next Steps
 
-Deliver features in this order (each one builds on the previous):
+🎉 All planned features are implemented. The app is feature-complete.
 
-1. **User can register and log in** — API endpoints + login/register pages
-2. **Unauthenticated users redirected to login** — route protection
-3. **User can view, add, edit, delete expenses** — dashboard + expense form
-4. **User can navigate and log out** — top navigation
-5. **Admin can manage categories** — categories list + category form + admin-only access
+Remaining work:
+- End-to-end testing (manual or automated)
+- Fill in README Insights section
+- Final commit + push

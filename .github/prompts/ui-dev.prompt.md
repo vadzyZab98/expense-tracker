@@ -29,16 +29,16 @@ client/expense-tracker-ui/src/
     axiosInstance.ts           not started
   layouts/
     AuthLayout.tsx            ✅ done
-    MainLayout.tsx            ⛾ stub
-    AdminLayout.tsx           ⛾ stub
+    MainLayout.tsx            ✅ done
+    AdminLayout.tsx           ✅ done
   pages/
     LoginPage.tsx             ✅ done
     RegisterPage.tsx          ✅ done
-    DashboardPage.tsx         ⛾ stub
-    ExpenseFormPage.tsx       ⛾ stub
+    DashboardPage.tsx         ✅ done
+    ExpenseFormPage.tsx       ✅ done
     admin/
-      CategoriesPage.tsx      ⛾ stub
-      CategoryFormPage.tsx    ⛾ stub
+      CategoriesPage.tsx      ✅ done
+      CategoryFormPage.tsx    ✅ done
   components/
     ProtectedRoute.tsx        ✅ done
     AdminRoute.tsx            ✅ done
