@@ -10,6 +10,8 @@ Return complete, compilable file contents only.
 
 > **Before implementing:** if anything in the task is ambiguous or missing, ask the user clarifying questions first. Do not assume — wait for answers before writing code.
 
+> **After implementing:** follow the **Mandatory Documentation Checklist** in `copilot-instructions.md` — update relevant prompt files, add a README step, and update shared docs if the change affects structure, models, API, or conventions. The task is not complete until documentation is updated.
+
 ---
 
 ## Architecture
@@ -19,10 +21,14 @@ Return complete, compilable file contents only.
 ```
 server/
   ExpenseTracker.sln
-  ExpenseTracker.Core/              ← Entities, interfaces (zero dependencies)
-  ExpenseTracker.Logic/             ← CQRS commands/queries (MediatR), DTOs, co-located validators, Result pattern
-  ExpenseTracker.Persistence/       ← EF Core DbContext, repositories
-  ExpenseTracker.Api/               ← Thin controllers (MediatR dispatch), auth services (JWT, BCrypt), composition root
+  shared/                               ← .editorconfig
+  src/
+    ExpenseTracker.Core/              ← Entities, interfaces (zero dependencies)
+    ExpenseTracker.Logic/             ← CQRS commands/queries (MediatR), DTOs, co-located validators, Result pattern
+    ExpenseTracker.Persistence/       ← EF Core DbContext, repositories
+    ExpenseTracker.Api/               ← Thin controllers (MediatR dispatch), auth services (JWT, BCrypt), composition root
+  tests/
+    ExpenseTracker.UnitTests/         ← xUnit + Moq + FluentAssertions
 ```
 
 ## Tech Stack

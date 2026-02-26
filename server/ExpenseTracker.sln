@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Api", "ExpenseTracker.Api\ExpenseTracker.Api.csproj", "{B9A9EDFF-F144-4CFA-9AE1-FF32C73CB373}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Api", "src\ExpenseTracker.Api\ExpenseTracker.Api.csproj", "{B9A9EDFF-F144-4CFA-9AE1-FF32C73CB373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Core", "ExpenseTracker.Core\ExpenseTracker.Core.csproj", "{7E40FBE1-B5F8-475C-A3FF-58E7AF0166E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Core", "src\ExpenseTracker.Core\ExpenseTracker.Core.csproj", "{7E40FBE1-B5F8-475C-A3FF-58E7AF0166E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Logic", "ExpenseTracker.Logic\ExpenseTracker.Logic.csproj", "{910E7804-2222-4DDC-B8D2-04DC0A20D18F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Logic", "src\ExpenseTracker.Logic\ExpenseTracker.Logic.csproj", "{910E7804-2222-4DDC-B8D2-04DC0A20D18F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Persistence", "ExpenseTracker.Persistence\ExpenseTracker.Persistence.csproj", "{62121BF4-D241-4CCC-8ED1-EB5F26CE94B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Persistence", "src\ExpenseTracker.Persistence\ExpenseTracker.Persistence.csproj", "{62121BF4-D241-4CCC-8ED1-EB5F26CE94B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.UnitTests", "tests\ExpenseTracker.UnitTests\ExpenseTracker.UnitTests.csproj", "{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,18 @@ Global
 		{62121BF4-D241-4CCC-8ED1-EB5F26CE94B4}.Release|x64.Build.0 = Release|Any CPU
 		{62121BF4-D241-4CCC-8ED1-EB5F26CE94B4}.Release|x86.ActiveCfg = Release|Any CPU
 		{62121BF4-D241-4CCC-8ED1-EB5F26CE94B4}.Release|x86.Build.0 = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|x64.Build.0 = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Debug|x86.Build.0 = Debug|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|x64.ActiveCfg = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|x64.Build.0 = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|x86.ActiveCfg = Release|Any CPU
+		{CC67E8D3-D921-4BB4-B760-07FC53E1CDBC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

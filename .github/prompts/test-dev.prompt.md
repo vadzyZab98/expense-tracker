@@ -10,6 +10,8 @@ Return complete, working TypeScript test file contents only.
 
 > **Before implementing:** if anything in the task is ambiguous or missing, ask the user clarifying questions first. Do not assume — wait for answers before writing code.
 
+> **After implementing:** follow the **Mandatory Documentation Checklist** in `copilot-instructions.md` — update relevant prompt files, add a README step, and update shared docs if the change affects structure, models, API, or conventions. The task is not complete until documentation is updated.
+
 ---
 
 ## Tech Stack
