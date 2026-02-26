@@ -1,0 +1,39 @@
+import { Routes, Route } from 'react-router-dom';
+import AuthLayout from './layouts/AuthLayout';
+import MainLayout from './layouts/MainLayout';
+import AdminLayout from './layouts/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import ExpenseFormPage from './pages/ExpenseFormPage';
+import CategoriesPage from './pages/admin/CategoriesPage';
+import CategoryFormPage from './pages/admin/CategoryFormPage';
+
+export default function App() {
+  return (
+    <Routes>
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/expenses/new" element={<ExpenseFormPage />} />
+          <Route path="/expenses/:id/edit" element={<ExpenseFormPage />} />
+        </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="categories/new" element={<CategoryFormPage />} />
+            <Route path="categories/:id/edit" element={<CategoryFormPage />} />
+          </Route>
+        </Route>
+      </Route>
+    </Routes>
+  );
+}
