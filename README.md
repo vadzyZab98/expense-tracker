@@ -81,6 +81,7 @@ A SuperAdmin user is seeded automatically via migration:
 | `.github/copilot-instructions.md` | Shared project context auto-loaded by Copilot |
 | `.github/prompts/backend-dev.prompt.md` | Backend agent instructions (load with `#backend-dev`) |
 | `.github/prompts/ui-dev.prompt.md` | UI agent instructions (load with `#ui-dev`) |
+| `.github/prompts/test-dev.prompt.md` | Test agent instructions (load with `#test-dev`) |
 | `.github/prompts/product-owner.prompt.md` | Product owner role  task tracking, prompt authoring |
 
 ## Agent Workflow
@@ -134,60 +135,6 @@ Three-agent model in a single Copilot Chat session:
 
 ---
 
-### Step 10 — Auth flow (UI)
-**Agent:** UI Developer
-**Prompt:**
-> Implement the full authentication flow: ProtectedRoute, AdminRoute, LoginPage, RegisterPage, AuthLayout.
-
-**Result:** Login/register forms with API calls, token persistence, redirects, error handling. Route guards redirect unauthenticated users to `/login` and non-admins away from admin area.
-**Accepted/Changed:** Accepted as-is.
-
----
-
-### Step 11 — Expenses UI
-**Agent:** UI Developer
-**Prompt:**
-> Implement DashboardPage (expense list, total, category filter, delete, links to add/edit) and ExpenseFormPage (add/edit form with amount, description, date, category select).
-
-**Result:** Dashboard with full expense table, color-coded category badges, total sum, filter, delete confirmation. ExpenseFormPage detects add vs edit mode from URL param.
-**Accepted/Changed:** Accepted as-is.
-
----
-
-### Step 12 — Navigation + Admin UI
-**Agent:** UI Developer
-**Prompt:**
-> Implement MainLayout (navbar + logout + Admin link for admins), AdminLayout (sidebar), CategoriesPage (table + delete + nav), CategoryFormPage (add/edit with color picker).
-
-**Result:** Full navigation with role-based Admin link, logout, admin category management with color swatches and color picker.
-**Accepted/Changed:** Accepted as-is.
-
----
-
-<!-- New steps will be added here by the Product Owner agent -->
-
----
-
-### Step 13 — Backend architecture refactor (Onion + CQRS)
-**Agent:** Backend Developer (GitHub Copilot, Claude Opus 4.6)
-**Prompt:**
-> Analyse the BE part of the project and suggest improvements according to best programming practices. Full refactor with Onion Architecture, DI, CQRS (MediatR), FluentValidation, repository pattern. Update all documentation.
-
-**Result:** Restructured from single-project to 4-project Onion Architecture (Domain, Application, Infrastructure, Api). Implemented CQRS with MediatR (16 command/query handlers), FluentValidation pipeline behavior, repository + UoW pattern, domain exceptions with ProblemDetails error responses, health checks. All API endpoints preserved — zero breaking changes for the frontend.
-**Accepted/Changed:** Accepted as-is. All endpoints verified: auth, CRUD, validation (422), authorization (403), conflict detection (409), health check.
-
----
-
-### Step 14 — Result pattern, project renaming, co-located validators
-**Agent:** Backend Developer (GitHub Copilot, Claude Opus 4.6)
-**Prompt:**
-> Remove domain exceptions, use Result&lt;T&gt; pattern instead. Co-locate validators with their commands/queries. Rename projects: Domain→Core, Application→Logic, Infrastructure→Persistence. Move auth services (JWT, BCrypt) from Infrastructure to Api.
-
-**Result:** Replaced 5 domain exception classes with Result/Result&lt;T&gt;/DomainError pattern. Renamed all projects (Core, Logic, Persistence, Api). Validators co-located in same folder as commands/queries. Auth services moved to Api/Auth/. Added ApiControllerBase with MapError() helper. GlobalExceptionHandler simplified to only handle ValidationException + unhandled errors.
-**Accepted/Changed:** Accepted as-is. All endpoints verified: register (201), login (200), duplicate email (409), bad password (401), expense CRUD (201/204/404), validation (422), categories (200/201/204).
-
----
-
 ### Step 5 — Backend models
 **Agent:** Backend Developer
 **Prompt:**
@@ -238,6 +185,56 @@ Three-agent model in a single Copilot Chat session:
 
 ---
 
+### Step 10 — Auth flow (UI)
+**Agent:** UI Developer
+**Prompt:**
+> Implement the full authentication flow: ProtectedRoute, AdminRoute, LoginPage, RegisterPage, AuthLayout.
+
+**Result:** Login/register forms with API calls, token persistence, redirects, error handling. Route guards redirect unauthenticated users to `/login` and non-admins away from admin area.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 11 — Expenses UI
+**Agent:** UI Developer
+**Prompt:**
+> Implement DashboardPage (expense list, total, category filter, delete, links to add/edit) and ExpenseFormPage (add/edit form with amount, description, date, category select).
+
+**Result:** Dashboard with full expense table, color-coded category badges, total sum, filter, delete confirmation. ExpenseFormPage detects add vs edit mode from URL param.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 12 — Navigation + Admin UI
+**Agent:** UI Developer
+**Prompt:**
+> Implement MainLayout (navbar + logout + Admin link for admins), AdminLayout (sidebar), CategoriesPage (table + delete + nav), CategoryFormPage (add/edit with color picker).
+
+**Result:** Full navigation with role-based Admin link, logout, admin category management with color swatches and color picker.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 13 — Backend architecture refactor (Onion + CQRS)
+**Agent:** Backend Developer (GitHub Copilot, Claude Opus 4.6)
+**Prompt:**
+> Analyse the BE part of the project and suggest improvements according to best programming practices. Full refactor with Onion Architecture, DI, CQRS (MediatR), FluentValidation, repository pattern. Update all documentation.
+
+**Result:** Restructured from single-project to 4-project Onion Architecture (Domain, Application, Infrastructure, Api). Implemented CQRS with MediatR (16 command/query handlers), FluentValidation pipeline behavior, repository + UoW pattern, domain exceptions with ProblemDetails error responses, health checks. All API endpoints preserved — zero breaking changes for the frontend.
+**Accepted/Changed:** Accepted as-is. All endpoints verified: auth, CRUD, validation (422), authorization (403), conflict detection (409), health check.
+
+---
+
+### Step 14 — Result pattern, project renaming, co-located validators
+**Agent:** Backend Developer (GitHub Copilot, Claude Opus 4.6)
+**Prompt:**
+> Remove domain exceptions, use Result&lt;T&gt; pattern instead. Co-locate validators with their commands/queries. Rename projects: Domain→Core, Application→Logic, Infrastructure→Persistence. Move auth services (JWT, BCrypt) from Infrastructure to Api.
+
+**Result:** Replaced 5 domain exception classes with Result/Result&lt;T&gt;/DomainError pattern. Renamed all projects (Core, Logic, Persistence, Api). Validators co-located in same folder as commands/queries. Auth services moved to Api/Auth/. Added ApiControllerBase with MapError() helper. GlobalExceptionHandler simplified to only handle ValidationException + unhandled errors.
+**Accepted/Changed:** Accepted as-is. All endpoints verified: register (201), login (200), duplicate email (409), bad password (401), expense CRUD (201/204/404), validation (422), categories (200/201/204).
+
+---
+
 ### Step 15 — SuperAdmin role & user management
 **Agent:** Backend Developer (GitHub Copilot, Claude Opus 4.6)
 **Prompt:**
@@ -262,6 +259,24 @@ Three-agent model in a single Copilot Chat session:
 - **Ant Design** `Table`, `Menu`, `Layout`, `Card`, `Tag`, `Modal.confirm`, `message`, `ColorPicker`, `DatePicker`, `Select`, `InputNumber`, `Spin`, `Alert` replaced all manual tables, nav bars, sidebars, buttons, inputs, loading indicators, error messages, and browser `confirm()`/`alert()` dialogs
 - Route guards (`ProtectedRoute`, `AdminRoute`) now use `useAuth()` hook
 - Zero inline style objects remain
+
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 17 — Validation tests (Vitest + Testing Library)
+**Agent:** Test Developer (GitHub Copilot, Claude Opus 4.6)
+**Prompt:**
+> Found couple most important places and add validation tests for them. Stack: Vitest (happy-dom), @testing-library/react, @testing-library/user-event, @testing-library/jest-dom. globals: true, BDD style, tests in `__tests__/` folders next to source. Also create new prompt file for test creation.
+
+**Result:** Testing infrastructure set up and 30 validation tests created across 3 Yup schemas:
+- **Installed** `vitest`, `happy-dom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`
+- **Configured** `vite.config.ts` with `test` section (globals, happy-dom, non-scoped CSS modules)
+- **Exported** validation schemas from `AuthFormPage` (`loginSchema`, `registerSchema`), `ExpenseFormPage` (`expenseSchema`), `CategoryFormPage` (`categorySchema`)
+- **AuthFormPage.test.ts** (12 tests) — email format/required, password required, min 8 chars for register, error messages
+- **ExpenseFormPage.test.ts** (11 tests) — amount > 0, description required, date required, categoryId >= 1, error messages
+- **CategoryFormPage.test.ts** (7 tests) — name required, hex color regex `#RRGGBB`, invalid formats, mixed case
+- **Created** `.github/prompts/test-dev.prompt.md` — test agent instructions (load with `#test-dev`)
 
 **Accepted/Changed:** Accepted as-is.
 

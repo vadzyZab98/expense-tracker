@@ -8,7 +8,7 @@ import { expenseApi } from '../api/expenseApi';
 import { categoryApi } from '../api/categoryApi';
 import type { Category } from '../types/models';
 
-const schema = Yup.object({
+export const expenseSchema = Yup.object({
   amount: Yup.number().min(0.01, 'Amount must be greater than 0').required('Amount is required'),
   description: Yup.string().required('Description is required'),
   date: Yup.string().required('Date is required'),
@@ -76,7 +76,7 @@ export default function ExpenseFormPage() {
 
       <Formik<ExpenseFormValues>
         initialValues={initialValues}
-        validationSchema={schema}
+        validationSchema={expenseSchema}
         enableReinitialize
         onSubmit={async (values, { setStatus }) => {
           try {

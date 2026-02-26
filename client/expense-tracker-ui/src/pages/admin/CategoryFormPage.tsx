@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Form, Input, ColorPicker, Button, Alert, Spin, Typography, Space } from 'antd';
 import { categoryApi } from '../../api/categoryApi';
 
-const schema = Yup.object({
+export const categorySchema = Yup.object({
   name: Yup.string().required('Name is required'),
   color: Yup.string()
     .matches(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color')
@@ -53,7 +53,7 @@ export default function CategoryFormPage() {
 
       <Formik<CategoryFormValues>
         initialValues={initialValues}
-        validationSchema={schema}
+        validationSchema={categorySchema}
         enableReinitialize
         onSubmit={async (values, { setStatus }) => {
           try {
