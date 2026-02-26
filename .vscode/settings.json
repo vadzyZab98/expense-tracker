@@ -5,6 +5,7 @@
         "Set-Content": true,
         "New-Item": true,
         "dotnet build": true,
-        "dotnet sln": true
+        "dotnet sln": true,
+        "npm run dev": true
     }
 }

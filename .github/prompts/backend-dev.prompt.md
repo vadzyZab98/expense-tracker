@@ -53,7 +53,7 @@ server/
 
 ### Logic Layer (`ExpenseTracker.Logic`)
 - References: **Core** only
-- `DTOs/`: `TokenResponse`, `CategoryResponse`, `ExpenseResponse`
+- `DTOs/`: `TokenResponse`, `CategoryResponse`, `ExpenseResponse`, `UserResponse`
 - `Interfaces/`: `ITokenService`, `IPasswordService`
 - `Common/`: `Result`, `Result<T>`, `DomainError` (sealed record with ErrorCode), `ErrorCode` enum (NotFound, Conflict, Unauthorized)
 - CQRS pattern: command/query + handler + validator **co-located per operation**
@@ -67,13 +67,15 @@ server/
   - `Expenses/UpdateExpense/`: command + handler + validator
   - `Expenses/DeleteExpense/`: command + handler
   - `Expenses/GetExpenses/`: query + handler
+  - `Users/GetUsers/`: query + handler
+  - `Users/AssignRole/`: command + handler + validator
 - `Behaviors/ValidationBehavior.cs`: MediatR pipeline behavior — runs validators before handlers
 - `LogicServiceExtensions.cs`: `AddLogic()` registers MediatR + FluentValidation
 
 ### Persistence Layer (`ExpenseTracker.Persistence`)
 - References: **Logic** + **Core**
 - `AppDbContext.cs`: EF Core context with `ApplyConfigurationsFromAssembly`
-- `Configurations/`: `UserConfiguration`, `CategoryConfiguration`, `ExpenseConfiguration` (IEntityTypeConfiguration)
+- `Configurations/`: `UserConfiguration` (seeds SuperAdmin user), `CategoryConfiguration`, `ExpenseConfiguration` (IEntityTypeConfiguration)
 - `Repositories/`: implementations of Core repository interfaces
 - `Migrations/`: EF Core auto-generated migrations
 - `PersistenceServiceExtensions.cs`: `AddPersistence(IConfiguration)` registers DbContext, repos, UoW
@@ -113,6 +115,7 @@ Domain exceptions are thrown in handlers and mapped to HTTP responses by `Global
 | `EmailAlreadyInUseException` | 409 |
 | `InvalidCredentialsException` | 401 |
 | `CategoryHasExpensesException` | 409 |
+| `CannotChangeSuperAdminRole` | 409 |
 | `ValidationException` (FluentValidation) | 422 |
 | Unhandled exceptions | 500 |
 

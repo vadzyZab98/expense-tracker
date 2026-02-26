@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import ExpenseFormPage from './pages/ExpenseFormPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import CategoryFormPage from './pages/admin/CategoryFormPage';
+import UsersPage from './pages/admin/UsersPage';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/new" element={<CategoryFormPage />} />
             <Route path="categories/:id/edit" element={<CategoryFormPage />} />
+            <Route path="users" element={<UsersPage />} />
           </Route>
         </Route>
       </Route>

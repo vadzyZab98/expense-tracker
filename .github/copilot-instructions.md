@@ -1,7 +1,7 @@
 ﻿# Copilot Instructions  Expense Tracker
 
 ## Project Overview
-Expense Tracker web app: users log personal expenses by category. Admins manage categories.
+Expense Tracker web app: users log personal expenses by category. Admins manage categories. SuperAdmin manages user roles.
 Backend uses **Onion Architecture** with **CQRS** (MediatR), **FluentValidation**, and **Repository pattern**.
 
 ## Agents
@@ -43,7 +43,7 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | Id           | int    | PK                    |
 | Email        | string | required, unique      |
 | PasswordHash | string | BCrypt hash           |
-| Role         | string | `"User"` or `"Admin"` |
+| Role         | string | `"User"`, `"Admin"`, or `"SuperAdmin"` |
 
 ### Category
 | Field | Type   | Notes                       |
@@ -81,18 +81,35 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | DELETE | /api/expenses/{id} |                                            | 204          |
 
 ### Categories
-| Method | Endpoint             | Auth       | Body              | Response     |
-|--------|----------------------|------------|-------------------|--------------|
-| GET    | /api/categories      | public     |                  | 200 + array  |
-| POST   | /api/categories      | Admin only | `{ name, color }` | 201 + object |
-| PUT    | /api/categories/{id} | Admin only | `{ name, color }` | 204          |
-| DELETE | /api/categories/{id} | Admin only |                  | 204          |
+| Method | Endpoint             | Auth                  | Body              | Response     |
+|--------|----------------------|-----------------------|-------------------|--------------|
+| GET    | /api/categories      | public                |                  | 200 + array  |
+| POST   | /api/categories      | Admin or SuperAdmin   | `{ name, color }` | 201 + object |
+| PUT    | /api/categories/{id} | Admin or SuperAdmin   | `{ name, color }` | 204          |
+| DELETE | /api/categories/{id} | Admin or SuperAdmin   |                  | 204          |
+
+### Users  SuperAdmin only
+| Method | Endpoint              | Body           | Response     |
+|--------|-----------------------|----------------|--------------|
+| GET    | /api/users            |               | 200 + array  |
+| PUT    | /api/users/{id}/role  | `{ role }`     | 204          |
 
 ---
 
 ## Auth Flow
 - JWT stored in `localStorage` under key `token`
 - Payload claims: `sub` (userId as string), `email`, `role`
-- First registered user  `Role = "Admin"`, all subsequent  `Role = "User"`
+- A **SuperAdmin** user (`admin@mail.ru` / `12345678`) is seeded via migration
+- All registered users get `Role = "User"` by default
+- SuperAdmin can promote users to `Admin` or revoke back to `User`
 - Token expires in 7 days
 - Frontend attaches token as `Authorization: Bearer <token>` header on every request
+
+---
+
+## Roles
+| Role       | Permissions                                      |
+|------------|--------------------------------------------------|
+| SuperAdmin | Manage user roles, manage categories, all access |
+| Admin      | Manage categories, own expenses                  |
+| User       | Own expenses only                                |

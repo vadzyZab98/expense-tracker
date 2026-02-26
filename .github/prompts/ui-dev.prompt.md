@@ -39,6 +39,7 @@ client/expense-tracker-ui/src/
     admin/
       CategoriesPage.tsx      ✅ done
       CategoryFormPage.tsx    ✅ done
+      UsersPage.tsx           ✅ done
   components/
     ProtectedRoute.tsx        ✅ done
     AdminRoute.tsx            ✅ done
@@ -53,7 +54,7 @@ client/expense-tracker-ui/src/
 interface User {
   id: number;
   email: string;
-  role: "User" | "Admin";
+  role: "User" | "Admin" | "SuperAdmin";
 }
 
 interface Category {
@@ -91,13 +92,13 @@ interface Expense {
 - Use: Login, Register pages
 
 ### MainLayout  `src/layouts/MainLayout.tsx`
-- Top navbar with app name and navigation links: **Dashboard** (`/`), and if user role is `"Admin"` also **Admin** (`/admin/categories`)
+- Top navbar with app name and navigation links: **Dashboard** (`/`), and if user role is `"Admin"` or `"SuperAdmin"` also **Admin** (`/admin/categories`)
 - Read token/role from `localStorage`
 - Logout button: clears `localStorage`, redirects to `/login`
 - Contains `<Outlet />` below navbar
 
 ### AdminLayout  `src/layouts/AdminLayout.tsx`
-- Left sidebar with navigation links: **Categories** (`/admin/categories`)
+- Left sidebar with navigation links: **Categories** (`/admin/categories`), and if user role is `"SuperAdmin"` also **Users** (`/admin/users`)
 - Contains `<Outlet />` next to sidebar (side-by-side layout)
 - Wrap with `<AdminRoute>` at the router level, not inside the layout itself
 
@@ -147,6 +148,14 @@ interface Expense {
 - On submit add: POST `/api/categories`, on submit edit: PUT `/api/categories/:id`
 - On success: redirect to `/admin/categories`
 
+### UsersPage  `src/pages/admin/UsersPage.tsx`
+- SuperAdmin only — fetches all users from GET `/api/users`
+- Table with columns: ID, email, role (colored badge), actions
+- SuperAdmin row shows no action (dash)
+- Admin row shows "Revoke Admin" button  PUT `/api/users/:id/role` with `{ role: "User" }`
+- User row shows "Make Admin" button  PUT `/api/users/:id/role` with `{ role: "Admin" }`
+- Updates local state optimistically on success
+
 ---
 
 ## Route Guards
@@ -158,8 +167,8 @@ interface Expense {
 
 ### AdminRoute  `src/components/AdminRoute.tsx`
 - Decode JWT from `localStorage.getItem("token")`, read `role` claim
-- If role is not `"Admin"`  `<Navigate to="/" replace />`
-- If Admin  `<Outlet />`
+- If role is not `"Admin"` and not `"SuperAdmin"`  `<Navigate to="/" replace />`
+- If Admin or SuperAdmin  `<Outlet />`
 - Use `JSON.parse(atob(token.split(".")[1]))` to decode payload
 
 ---
@@ -176,6 +185,7 @@ interface Expense {
   /admin/categories           CategoriesPage
   /admin/categories/new       CategoryFormPage
   /admin/categories/:id/edit  CategoryFormPage
+  /admin/users                UsersPage
 ```
 
 ---

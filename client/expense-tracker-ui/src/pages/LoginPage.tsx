@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosInstance';
 
 export default function LoginPage() {
@@ -57,6 +57,9 @@ export default function LoginPage() {
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
+      <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
+        Don't have an account? <Link to='/register'>Register</Link>
+      </p>
     </>
   );
 }

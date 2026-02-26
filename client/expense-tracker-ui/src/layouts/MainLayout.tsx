@@ -33,7 +33,7 @@ export default function MainLayout() {
       }}>
         <span style={{ fontWeight: 700, fontSize: '18px', marginRight: '8px' }}>Expense Tracker</span>
         <Link to='/' style={navLinkStyle}>Dashboard</Link>
-        {role === 'Admin' && (
+        {(role === 'Admin' || role === 'SuperAdmin') && (
           <Link to='/admin/categories' style={navLinkStyle}>Admin</Link>
         )}
         <button
@@ -55,6 +55,20 @@ export default function MainLayout() {
       <main style={{ flex: 1 }}>
         <Outlet />
       </main>
+      <footer style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        padding: '16px 24px',
+        borderTop: '1px solid #f0f0f0',
+        backgroundColor: '#fafafa',
+        color: '#888',
+        fontSize: '13px',
+      }}>
+        <span style={{ fontSize: '20px' }}>💰</span>
+        <span>Expense Tracker &copy; {new Date().getFullYear()}</span>
+      </footer>
     </div>
   );
 }

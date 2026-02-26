@@ -32,13 +32,11 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Re
         if (existing is not null)
             return Result<TokenResponse>.Failure(DomainError.Conflict("Email already in use."));
 
-        var isFirstUser = await _users.IsEmptyAsync(ct);
-
         var user = new User
         {
             Email = request.Email,
             PasswordHash = _passwords.Hash(request.Password),
-            Role = isFirstUser ? "Admin" : "User"
+            Role = "User"
         };
 
         await _users.AddAsync(user, ct);

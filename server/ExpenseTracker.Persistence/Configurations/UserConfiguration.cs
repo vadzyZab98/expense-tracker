@@ -23,5 +23,13 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(20)
             .HasDefaultValue("User");
+
+        builder.HasData(new User
+        {
+            Id = 1,
+            Email = "admin@mail.ru",
+            PasswordHash = "$2a$11$vl6CAOryt2jKNTDO/16CruyY1waXPmMds9QF1jbMtcxmuNZqig9Im",
+            Role = "SuperAdmin"
+        });
     }
 }
