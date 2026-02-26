@@ -97,6 +97,16 @@ Three-agent model in a single Copilot Chat session:
 
 ---
 
+### Step 10 — Auth flow (UI)
+**Agent:** UI Developer
+**Prompt:**
+> Implement the full authentication flow: ProtectedRoute, AdminRoute, LoginPage, RegisterPage, AuthLayout.
+
+**Result:** Login/register forms with API calls, token persistence, redirects, error handling. Route guards redirect unauthenticated users to `/login` and non-admins away from admin area.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
 <!-- New steps will be added here by the Product Owner agent -->
 
 ---

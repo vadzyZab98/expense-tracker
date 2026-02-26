@@ -28,9 +28,9 @@ You are the **Product Owner** for the Expense Tracker project. You think in term
 
 | Feature | Status |
 |---------|--------|
-| User can register an account | 🔧 API ready, UI pending |
-| User can log in and receive a token | 🔧 API ready, UI pending |
-| Unauthenticated users are redirected to login | ⚙️ not working |
+| User can register an account | ✅ working |
+| User can log in and receive a token | ✅ working |
+| Unauthenticated users are redirected to login | ✅ working |
 | User can view their expense list | 🔧 API ready, UI pending |
 | User can add a new expense | 🔧 API ready, UI pending |
 | User can edit an existing expense | 🔧 API ready, UI pending |
@@ -47,7 +47,7 @@ You are the **Product Owner** for the Expense Tracker project. You think in term
 | Admin can add a new category | 🔧 API ready, UI pending |
 | Admin can edit a category | 🔧 API ready, UI pending |
 | Admin can delete a category | 🔧 API ready, UI pending |
-| Non-admin users cannot access admin area | ⚙️ not working |
+| Non-admin users cannot access admin area | ✅ working |
 
 ---
 
