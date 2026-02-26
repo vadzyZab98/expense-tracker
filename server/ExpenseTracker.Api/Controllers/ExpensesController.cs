@@ -44,6 +44,28 @@ public class ExpensesController : ControllerBase
         return Ok(expenses);
     }
 
+    // GET /api/expenses/{id}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var expense = await _db.Expenses
+            .Where(e => e.Id == id && e.UserId == CurrentUserId)
+            .Include(e => e.Category)
+            .Select(e => new
+            {
+                e.Id,
+                e.Amount,
+                e.Description,
+                e.Date,
+                e.CategoryId,
+                Category = new { e.Category.Id, e.Category.Name, e.Category.Color }
+            })
+            .FirstOrDefaultAsync();
+
+        if (expense is null) return NotFound();
+        return Ok(expense);
+    }
+
     // POST /api/expenses
     [HttpPost]
     public async Task<IActionResult> Create(ExpenseRequest request)

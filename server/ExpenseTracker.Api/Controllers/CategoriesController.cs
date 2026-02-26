@@ -29,6 +29,20 @@ public class CategoriesController : ControllerBase
         return Ok(categories);
     }
 
+    // GET /api/categories/{id} — public
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var category = await _db.Categories
+            .Where(c => c.Id == id)
+            .Select(c => new { c.Id, c.Name, c.Color })
+            .FirstOrDefaultAsync();
+
+        if (category is null) return NotFound();
+        return Ok(category);
+    }
+
     // POST /api/categories — Admin only
     [HttpPost]
     [Authorize(Roles = "Admin")]
@@ -69,6 +83,10 @@ public class CategoriesController : ControllerBase
     {
         var category = await _db.Categories.FindAsync(id);
         if (category is null) return NotFound();
+
+        bool hasExpenses = await _db.Expenses.AnyAsync(e => e.CategoryId == id);
+        if (hasExpenses)
+            return Conflict(new { message = "Cannot delete a category that has expenses assigned to it." });
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync();

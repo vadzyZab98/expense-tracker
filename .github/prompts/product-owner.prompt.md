@@ -89,6 +89,13 @@ When a feature works end-to-end:
 
 🎉 All planned features are implemented. The app is feature-complete.
 
+Frontend tech stack has been migrated to:
+- Tailwind CSS 3 + CSS Modules (styling)
+- React Hook Form + Yup (form validation)
+- SWR + Axios (data fetching with caching)
+- AuthContext (centralized auth state)
+- ESLint 9 + Prettier + husky + lint-staged (code quality)
+
 Remaining work:
 - End-to-end testing (manual or automated)
 - Fill in README Insights section
