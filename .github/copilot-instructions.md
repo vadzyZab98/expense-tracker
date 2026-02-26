@@ -6,7 +6,7 @@ Expense Tracker web app: users log personal expenses by category. Admins manage 
 ## Agents
 - **Product Owner**  task decomposition, prompt writing, file updates, progress tracking. Load with `#product-owner`.
 - **Backend Developer**  .NET 8 Web API implementation. Load with `#backend-dev`.
-- **UI Developer**  React + Vite + TypeScript implementation. Load with `#ui-dev`.- **Code Reviewer** — review changes, clean up files, commit. Load with `#code-reviewer`.
+- **UI Developer**  React + Vite + TypeScript implementation. Load with `#ui-dev`.
 ---
 
 ## Ports

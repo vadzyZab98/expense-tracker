@@ -28,14 +28,14 @@ You are the **Product Owner** for the Expense Tracker project. You think in term
 
 | Feature | Status |
 |---------|--------|
-| User can register an account | ⚙️ not working |
-| User can log in and receive a token | ⚙️ not working |
+| User can register an account | 🔧 API ready, UI pending |
+| User can log in and receive a token | 🔧 API ready, UI pending |
 | Unauthenticated users are redirected to login | ⚙️ not working |
-| User can view their expense list | ⚙️ not working |
-| User can add a new expense | ⚙️ not working |
-| User can edit an existing expense | ⚙️ not working |
-| User can delete an expense | ⚙️ not working |
-| User can filter expenses by category | ⚙️ not working |
+| User can view their expense list | 🔧 API ready, UI pending |
+| User can add a new expense | 🔧 API ready, UI pending |
+| User can edit an existing expense | 🔧 API ready, UI pending |
+| User can delete an expense | 🔧 API ready, UI pending |
+| User can filter expenses by category | 🔧 API ready, UI pending |
 | User can navigate the app via a top menu | ⚙️ not working |
 | User can log out | ⚙️ not working |
 
@@ -43,10 +43,10 @@ You are the **Product Owner** for the Expense Tracker project. You think in term
 
 | Feature | Status |
 |---------|--------|
-| Admin can view the categories list | ⚙️ not working |
-| Admin can add a new category | ⚙️ not working |
-| Admin can edit a category | ⚙️ not working |
-| Admin can delete a category | ⚙️ not working |
+| Admin can view the categories list | 🔧 API ready, UI pending |
+| Admin can add a new category | 🔧 API ready, UI pending |
+| Admin can edit a category | 🔧 API ready, UI pending |
+| Admin can delete a category | 🔧 API ready, UI pending |
 | Non-admin users cannot access admin area | ⚙️ not working |
 
 ---

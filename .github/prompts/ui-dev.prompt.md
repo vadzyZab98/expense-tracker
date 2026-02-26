@@ -181,9 +181,11 @@ interface Expense {
 ---
 
 ## Coding Conventions
-- Functional components only, no class components
+- Components declared with `function` keyword: `export default function LoginPage() {}`
+- All other functions (handlers, helpers, callbacks) use arrow functions: `const handleSubmit = async () => {}`
 - `useState` + `useEffect` for data fetching (no external state library)
 - All API calls via the axios instance from `src/api/axiosInstance.ts`
-- TypeScript  no `any`, use the interfaces defined above
-- All components use `export default`
+- TypeScript — no `any`, use the interfaces defined above
+- Indentation: 2 spaces, no tabs
+- Single quotes for strings
 - Keep CSS minimal  inline styles or basic className strings (no CSS framework required)

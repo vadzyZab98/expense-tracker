@@ -101,6 +101,56 @@ Three-agent model in a single Copilot Chat session:
 
 ---
 
+### Step 5 — Backend models
+**Agent:** Backend Developer
+**Prompt:**
+> Implement `Models/User.cs`, `Models/Category.cs`, `Models/Expense.cs`. Use the Data Models table from `copilot-instructions.md`. Add navigation properties `User` and `Category` to `Expense`.
+
+**Result:** Three model classes with all properties, FK relations, and navigation properties.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 6 — AppDbContext
+**Agent:** Backend Developer
+**Prompt:**
+> Implement `Data/AppDbContext.cs`. DbSets for User, Category, Expense. Seed default categories in `OnModelCreating`.
+
+**Result:** Context with 3 DbSets, fluent config (unique email, decimal precision, FK cascades), 8 seeded categories.
+**Accepted/Changed:** Agent seeded 8 categories instead of 6 — accepted, extra categories add value.
+
+---
+
+### Step 7 — appsettings.json + Program.cs
+**Agent:** Backend Developer
+**Prompt:**
+> Configure `appsettings.json` and `Program.cs` so the API starts on port 5001 with authentication, database, CORS, and Swagger.
+
+**Result:** SQLite connection, JWT config, CORS for `http://localhost:5173`, Swagger with Bearer support, auto-migration on startup.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 8 — AuthController
+**Agent:** Backend Developer
+**Prompt:**
+> Implement register and login endpoints. First registered user becomes Admin. Return a JWT token on success.
+
+**Result:** `POST /api/auth/register` and `POST /api/auth/login` with BCrypt hashing, role assignment, and 7-day JWT.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 9 — ExpensesController + CategoriesController
+**Agent:** Backend Developer
+**Prompt:**
+> Implement expenses CRUD (user sees only their own). Implement categories endpoints — anyone reads, only Admins write.
+
+**Result:** Full CRUD for expenses scoped by userId from JWT. Categories: public GET, Admin-only POST/PUT/DELETE.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
 ## Insights
 
 > *To be filled after project completion*

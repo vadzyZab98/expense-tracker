@@ -38,17 +38,17 @@ Return complete, compilable file contents only.
 ```
 server/ExpenseTracker.Api/
   Models/
-    User.cs           stub  needs implementation
-    Category.cs       stub  needs implementation
-    Expense.cs        stub  needs implementation
+    User.cs          ✅ done
+    Category.cs      ✅ done
+    Expense.cs       ✅ done
   Data/
-    AppDbContext.cs   stub  needs implementation
+    AppDbContext.cs  ✅ done
   Controllers/
-    AuthController.cs         stub  needs implementation
-    ExpensesController.cs     stub  needs implementation
-    CategoriesController.cs   stub  needs implementation
-  appsettings.json            needs JWT + ConnectionString sections
-  Program.cs                  needs full setup
+    AuthController.cs        ✅ done
+    ExpensesController.cs    ✅ done
+    CategoriesController.cs  ✅ done
+  appsettings.json           ✅ done
+  Program.cs                 ✅ done
   Properties/
     launchSettings.json       port set to http://localhost:5001
 ```
@@ -184,8 +184,10 @@ On startup (before `app.Run()`): create a scope, get `AppDbContext`, call `db.Da
 
 ## Coding Conventions
 - File-scoped namespaces: `namespace ExpenseTracker.Api.Models;`
+- Use `var` everywhere the type is inferrable
 - `async/await` + `CancellationToken ct = default` on all controller actions that hit the DB
 - Return `IActionResult` or `ActionResult<T>`
-- No DTOs  use model classes directly in controller parameters and return values
+- No DTOs — use model classes directly in controller parameters and return values
 - No manual `[HttpGet]`/`[HttpPost]` attribute duplication when route is sufficient
-- Do NOT use minimal API (`app.MapGet` etc.)  use controllers only
+- Do NOT use minimal API (`app.MapGet` etc.) — use controllers only
+- Indentation: 4 spaces, no tabs
