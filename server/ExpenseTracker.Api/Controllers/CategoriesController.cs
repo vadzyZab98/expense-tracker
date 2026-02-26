@@ -1,77 +1,63 @@
+using ExpenseTracker.Logic.Categories.CreateCategory;
+using ExpenseTracker.Logic.Categories.DeleteCategory;
+using ExpenseTracker.Logic.Categories.GetCategories;
+using ExpenseTracker.Logic.Categories.UpdateCategory;
+using ExpenseTracker.Logic.DTOs;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ExpenseTracker.Api.Data;
-using ExpenseTracker.Api.Models;
 
 namespace ExpenseTracker.Api.Controllers;
 
-[ApiController]
 [Route("api/categories")]
-public class CategoriesController : ControllerBase
+public class CategoriesController : ApiControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IMediator _mediator;
 
-    public CategoriesController(AppDbContext db) => _db = db;
+    public CategoriesController(IMediator mediator) => _mediator = mediator;
 
     public record CategoryRequest(string Name, string Color);
 
-    // GET /api/categories — public
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(typeof(IReadOnlyList<CategoryResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var categories = await _db.Categories
-            .OrderBy(c => c.Name)
-            .Select(c => new { c.Id, c.Name, c.Color })
-            .ToListAsync();
-
-        return Ok(categories);
+        var result = await _mediator.Send(new GetCategoriesQuery(), ct);
+        return Ok(result);
     }
 
-    // POST /api/categories — Admin only
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create(CategoryRequest request)
+    [ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Create(CategoryRequest request, CancellationToken ct)
     {
-        var category = new Category
-        {
-            Name = request.Name,
-            Color = request.Color
-        };
-
-        _db.Categories.Add(category);
-        await _db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetAll), new { id = category.Id },
-            new { category.Id, category.Name, category.Color });
+        var result = await _mediator.Send(new CreateCategoryCommand(request.Name, request.Color), ct);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(GetAll), new { id = result.Value!.Id }, result.Value)
+            : MapError(result.Error!);
     }
 
-    // PUT /api/categories/{id} — Admin only
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(int id, CategoryRequest request)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Update(int id, CategoryRequest request, CancellationToken ct)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category is null) return NotFound();
-
-        category.Name = request.Name;
-        category.Color = request.Color;
-
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var result = await _mediator.Send(new UpdateCategoryCommand(id, request.Name, request.Color), ct);
+        return result.IsSuccess ? NoContent() : MapError(result.Error!);
     }
 
-    // DELETE /api/categories/{id} — Admin only
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category is null) return NotFound();
-
-        _db.Categories.Remove(category);
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var result = await _mediator.Send(new DeleteCategoryCommand(id), ct);
+        return result.IsSuccess ? NoContent() : MapError(result.Error!);
     }
 }

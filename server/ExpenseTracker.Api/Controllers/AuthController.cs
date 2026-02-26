@@ -1,82 +1,41 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using ExpenseTracker.Logic.Auth.Login;
+using ExpenseTracker.Logic.Auth.Register;
+using ExpenseTracker.Logic.DTOs;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using ExpenseTracker.Api.Data;
-using ExpenseTracker.Api.Models;
 
 namespace ExpenseTracker.Api.Controllers;
 
-[ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public class AuthController : ApiControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IConfiguration _config;
+    private readonly IMediator _mediator;
 
-    public AuthController(AppDbContext db, IConfiguration config)
-    {
-        _db = db;
-        _config = config;
-    }
+    public AuthController(IMediator mediator) => _mediator = mediator;
 
     public record AuthRequest(string Email, string Password);
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(AuthRequest request)
+    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Register(AuthRequest request, CancellationToken ct)
     {
-        if (await _db.Users.AnyAsync(u => u.Email == request.Email))
-            return Conflict(new { message = "Email already in use." });
-
-        var isFirstUser = !await _db.Users.AnyAsync();
-
-        var user = new User
-        {
-            Email = request.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = isFirstUser ? "Admin" : "User"
-        };
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        return CreatedAtAction(null, null, new { token = GenerateToken(user) });
+        var result = await _mediator.Send(new RegisterCommand(request.Email, request.Password), ct);
+        return result.IsSuccess
+            ? StatusCode(StatusCodes.Status201Created, result.Value)
+            : MapError(result.Error!);
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(AuthRequest request)
+    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Login(AuthRequest request, CancellationToken ct)
     {
-        var user = await _db.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
-
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return Unauthorized(new { message = "Invalid email or password." });
-
-        return Ok(new { token = GenerateToken(user) });
-    }
-
-    private string GenerateToken(User user)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiryDays = int.Parse(_config["Jwt:ExpiryDays"] ?? "7");
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(expiryDays),
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var result = await _mediator.Send(new LoginQuery(request.Email, request.Password), ct);
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : MapError(result.Error!);
     }
 }

@@ -2,6 +2,7 @@
 
 ## Project Overview
 Expense Tracker web app: users log personal expenses by category. Admins manage categories.
+Backend uses **Onion Architecture** with **CQRS** (MediatR), **FluentValidation**, and **Repository pattern**.
 
 ## Agents
 - **Product Owner**  task decomposition, prompt writing, file updates, progress tracking. Load with `#product-owner`.
@@ -14,6 +15,23 @@ Expense Tracker web app: users log personal expenses by category. Admins manage 
 |----------|-----------------------|
 | Backend  | http://localhost:5001 |
 | Frontend | http://localhost:5173 |
+
+---
+
+## Solution Structure
+
+```
+server/
+  ExpenseTracker.sln
+  ExpenseTracker.Core/             ← Entities, interfaces (zero dependencies)
+  ExpenseTracker.Logic/            ← CQRS commands/queries (MediatR), DTOs, co-located validators, Result pattern
+  ExpenseTracker.Persistence/      ← EF Core DbContext, repositories
+  ExpenseTracker.Api/              ← Thin controllers (MediatR dispatch), auth services (JWT, BCrypt), composition root
+```
+
+Dependency direction: **Api → Persistence → Logic → Core**
+
+Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers return `Result` / `Result<T>` with `DomainError` (NotFound, Conflict, Unauthorized). Controllers use `ApiControllerBase.MapError()` to convert errors to ProblemDetails.
 
 ---
 

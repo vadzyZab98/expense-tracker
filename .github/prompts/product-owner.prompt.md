@@ -88,6 +88,8 @@ When a feature works end-to-end:
 ## Next Steps
 
 🎉 All planned features are implemented. The app is feature-complete.
+Backend has been refactored to **Onion Architecture** with **CQRS (MediatR)**, **FluentValidation**, **Repository pattern**, and **Result&lt;T&gt; pattern** (Steps 13-14).
+Projects renamed: Core, Logic, Persistence, Api. Validators co-located with commands/queries. Auth services in Api layer.
 
 Remaining work:
 - End-to-end testing (manual or automated)

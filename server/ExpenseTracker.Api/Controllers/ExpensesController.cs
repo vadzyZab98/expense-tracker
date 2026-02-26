@@ -1,20 +1,23 @@
 using System.Security.Claims;
+using ExpenseTracker.Logic.DTOs;
+using ExpenseTracker.Logic.Expenses.CreateExpense;
+using ExpenseTracker.Logic.Expenses.DeleteExpense;
+using ExpenseTracker.Logic.Expenses.GetExpenseById;
+using ExpenseTracker.Logic.Expenses.GetExpenses;
+using ExpenseTracker.Logic.Expenses.UpdateExpense;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ExpenseTracker.Api.Data;
-using ExpenseTracker.Api.Models;
 
 namespace ExpenseTracker.Api.Controllers;
 
-[ApiController]
 [Route("api/expenses")]
 [Authorize]
-public class ExpensesController : ControllerBase
+public class ExpensesController : ApiControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IMediator _mediator;
 
-    public ExpensesController(AppDbContext db) => _db = db;
+    public ExpensesController(IMediator mediator) => _mediator = mediator;
 
     private int CurrentUserId =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -22,82 +25,52 @@ public class ExpensesController : ControllerBase
 
     public record ExpenseRequest(decimal Amount, string Description, DateTime Date, int CategoryId);
 
-    // GET /api/expenses
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(typeof(IReadOnlyList<ExpenseResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var expenses = await _db.Expenses
-            .Where(e => e.UserId == CurrentUserId)
-            .Include(e => e.Category)
-            .OrderByDescending(e => e.Date)
-            .Select(e => new
-            {
-                e.Id,
-                e.Amount,
-                e.Description,
-                e.Date,
-                e.CategoryId,
-                Category = new { e.Category.Id, e.Category.Name, e.Category.Color }
-            })
-            .ToListAsync();
-
-        return Ok(expenses);
+        var result = await _mediator.Send(new GetExpensesQuery(CurrentUserId), ct);
+        return Ok(result);
     }
 
-    // POST /api/expenses
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ExpenseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetExpenseByIdQuery(id, CurrentUserId), ct);
+        return result.IsSuccess ? Ok(result.Value) : MapError(result.Error!);
+    }
+
     [HttpPost]
-    public async Task<IActionResult> Create(ExpenseRequest request)
+    [ProducesResponseType(typeof(ExpenseResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Create(ExpenseRequest request, CancellationToken ct)
     {
-        var expense = new Expense
-        {
-            UserId = CurrentUserId,
-            CategoryId = request.CategoryId,
-            Amount = request.Amount,
-            Description = request.Description,
-            Date = request.Date
-        };
-
-        _db.Expenses.Add(expense);
-        await _db.SaveChangesAsync();
-
-        await _db.Entry(expense).Reference(e => e.Category).LoadAsync();
-
-        return CreatedAtAction(nameof(GetAll), new { id = expense.Id }, new
-        {
-            expense.Id,
-            expense.Amount,
-            expense.Description,
-            expense.Date,
-            expense.CategoryId,
-            Category = new { expense.Category.Id, expense.Category.Name, expense.Category.Color }
-        });
+        var result = await _mediator.Send(
+            new CreateExpenseCommand(CurrentUserId, request.Amount, request.Description, request.Date, request.CategoryId), ct);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(GetAll), new { id = result.Value!.Id }, result.Value)
+            : MapError(result.Error!);
     }
 
-    // PUT /api/expenses/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ExpenseRequest request)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Update(int id, ExpenseRequest request, CancellationToken ct)
     {
-        var expense = await _db.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == CurrentUserId);
-        if (expense is null) return NotFound();
-
-        expense.Amount = request.Amount;
-        expense.Description = request.Description;
-        expense.Date = request.Date;
-        expense.CategoryId = request.CategoryId;
-
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var result = await _mediator.Send(
+            new UpdateExpenseCommand(id, CurrentUserId, request.Amount, request.Description, request.Date, request.CategoryId), ct);
+        return result.IsSuccess ? NoContent() : MapError(result.Error!);
     }
 
-    // DELETE /api/expenses/{id}
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        var expense = await _db.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == CurrentUserId);
-        if (expense is null) return NotFound();
-
-        _db.Expenses.Remove(expense);
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var result = await _mediator.Send(new DeleteExpenseCommand(id, CurrentUserId), ct);
+        return result.IsSuccess ? NoContent() : MapError(result.Error!);
     }
 }
