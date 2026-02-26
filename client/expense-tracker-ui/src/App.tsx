@@ -1,15 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
-import AuthLayout from '@/layouts/AuthLayout';
-import MainLayout from '@/layouts/MainLayout';
-import AdminLayout from '@/layouts/AdminLayout';
-import ProtectedRoute from '@/components/routing/ProtectedRoute';
-import AdminRoute from '@/components/routing/AdminRoute';
-import LoginPage from '@/pages/auth/LoginPage';
-import RegisterPage from '@/pages/auth/RegisterPage';
-import DashboardPage from '@/pages/dashboard';
-import ExpenseFormPage from '@/pages/expenses';
-import CategoriesPage from '@/pages/admin/categories';
-import CategoryFormPage from '@/pages/admin/category-form';
+import AuthLayout from './layouts/AuthLayout';
+import MainLayout from './layouts/MainLayout';
+import AdminLayout from './layouts/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import ExpenseFormPage from './pages/ExpenseFormPage';
+import CategoriesPage from './pages/admin/CategoriesPage';
+import CategoryFormPage from './pages/admin/CategoryFormPage';
 
 export default function App() {
   return (

@@ -9,16 +9,13 @@ Expense Tracker web app: users log personal expenses by category. Admins manage 
 - **UI Developer**  React + Vite + TypeScript implementation. Load with `#ui-dev`.
 ---
 
-## Frontend Tech Stack
-| Concern | Technology |
-|---------|-----------|
-| UI Framework | React 18 (JSX) |
-| Routing | React Router DOM 6 |
-| Styling | Tailwind CSS 3 + PostCSS + CSS Modules (.module.css) |
-| Forms | React Hook Form + Yup (validation) + @hookform/resolvers |
-| Data fetching | SWR (caching/revalidation) + Axios (HTTP client) |
-| Utilities | lodash (selective), date-fns, classnames, query-string, b64-to-blob |
-| Linting/Formatting | ESLint 9 + Prettier + husky + lint-staged (pre-commit hooks) |
+## Ports
+| Service  | URL                   |
+|----------|-----------------------|
+| Backend  | http://localhost:5001 |
+| Frontend | http://localhost:5173 |
+
+---
 
 ## Data Models (single source of truth)
 

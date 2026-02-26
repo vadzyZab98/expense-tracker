@@ -13,172 +13,158 @@ Return complete, working TypeScript/TSX file contents only.
 ---
 
 ## Tech Stack
-| Concern | Technology |
-|---------|-----------|
-| UI Framework | React 18 + Vite + TypeScript |
-| Routing | React Router DOM v6 |
-| Styling | Tailwind CSS 3 + PostCSS + CSS Modules (`.module.css`) |
-| Forms | React Hook Form + Yup + `@hookform/resolvers` |
-| Data Fetching | SWR (caching/revalidation) + Axios (HTTP client) |
-| Utilities | lodash (selective), date-fns, classnames, query-string, b64-to-blob |
-| Linting | ESLint 9 + Prettier + husky + lint-staged |
-
+- **Framework:** React 18 + Vite + TypeScript
+- **Routing:** React Router DOM v6
+- **HTTP:** Axios
 - **Project path:** `client/expense-tracker-ui/`
 - **Source root:** `client/expense-tracker-ui/src/`
-- **Path alias:** `@/` maps to `src/`
 
 ---
 
-## Project Structure
+## File Structure & Status
 
 ```
-src/
+client/expense-tracker-ui/src/
   api/
-    axiosInstance.ts      # Axios instance with interceptors
-    fetcher.ts            # SWR fetcher wrapper
-  components/
-    AdminRoute.tsx        # Route guard — admin only
-    ProtectedRoute.tsx    # Route guard — authenticated only
-  context/
-    AuthContext.tsx        # AuthProvider + useAuth hook
-  hooks/
-    useData.ts            # SWR hooks: useExpenses, useCategories, etc.
+    axiosInstance.ts           not started
   layouts/
-    AuthLayout.tsx        # Centered card layout
-    AuthLayout.module.css
-    MainLayout.tsx        # Top nav + Outlet
-    MainLayout.module.css
-    AdminLayout.tsx       # Sidebar + Outlet
-    AdminLayout.module.css
+    AuthLayout.tsx            ✅ done
+    MainLayout.tsx            ✅ done
+    AdminLayout.tsx           ✅ done
   pages/
-    LoginPage.tsx
-    RegisterPage.tsx
-    AuthForm.module.css   # Shared auth form styles
-    DashboardPage.tsx
-    DashboardPage.module.css
-    ExpenseFormPage.tsx
-    ExpenseFormPage.module.css
+    LoginPage.tsx             ✅ done
+    RegisterPage.tsx          ✅ done
+    DashboardPage.tsx         ✅ done
+    ExpenseFormPage.tsx       ✅ done
     admin/
-      CategoriesPage.tsx
-      CategoriesPage.module.css
-      CategoryFormPage.tsx
-      CategoryFormPage.module.css
-  types/
-    index.ts              # Shared TypeScript interfaces
-  utils/
-    helpers.ts            # formatDate, formatCurrency, decodeToken, etc.
-  validation/
-    schemas.ts            # Yup schemas + inferred form types
-  index.css               # Tailwind directives + base styles
-  vite-env.d.ts           # CSS module declarations
-  App.tsx
-  main.tsx
+      CategoriesPage.tsx      ✅ done
+      CategoryFormPage.tsx    ✅ done
+  components/
+    ProtectedRoute.tsx        ✅ done
+    AdminRoute.tsx            ✅ done
+  App.tsx                     ✅ done
 ```
 
 ---
 
-## Auth & State
+## TypeScript Interfaces
 
-### AuthContext — `src/context/AuthContext.tsx`
-- `AuthProvider` wraps the app in `main.tsx`
-- `useAuth()` returns: `token`, `role`, `isAuthenticated`, `isAdmin`, `login(token)`, `logout()`
-- Token stored in `localStorage`, decoded via `src/utils/helpers.ts`
-- Expired tokens are automatically cleared
+```typescript
+interface User {
+  id: number;
+  email: string;
+  role: "User" | "Admin";
+}
 
-### Route Guards
-- **ProtectedRoute** — reads `useAuth().isAuthenticated`, redirects to `/login`
-- **AdminRoute** — reads `useAuth().isAdmin`, redirects to `/`
+interface Category {
+  id: number;
+  name: string;
+  color: string; // hex, e.g. "#FF6B6B"
+}
 
----
-
-## Data Fetching (SWR)
-
-All data-fetching uses SWR hooks from `src/hooks/useData.ts`:
-- `useExpenses()` — GET `/api/expenses`
-- `useExpense(id)` — GET `/api/expenses/:id`
-- `useCategories()` — GET `/api/categories`
-- `useCategory(id)` — GET `/api/categories/:id`
-
-Mutations (POST/PUT/DELETE) call Axios directly, then call `mutate()` to revalidate.
-
----
-
-## Forms (React Hook Form + Yup)
-
-All forms use `useForm()` with `yupResolver()`:
-- Schemas defined in `src/validation/schemas.ts`
-- Form types inferred with `yup.InferType`
-- Validation runs on submit; field errors displayed inline
-- Server errors shown separately
+interface Expense {
+  id: number;
+  userId: number;
+  categoryId: number;
+  category?: Category;
+  amount: number;
+  description: string;
+  date: string; // ISO string
+}
+```
 
 ---
 
-## Styling Convention
-- **Tailwind CSS** for utility classes (flex, padding, margin, etc.)
-- **CSS Modules** (`.module.css`) for component-specific styles
-- **classnames** library to compose conditional classes
-- No inline `style={}` objects — use Tailwind classes or CSS Module classes
-- Each layout/page has a co-located `.module.css` file
+## Axios Instance  `src/api/axiosInstance.ts`
+
+- `baseURL`: `http://localhost:5001`
+- Request interceptor: read `localStorage.getItem("token")`, if present attach as `Authorization: Bearer <token>` header
+- Export as default
 
 ---
 
 ## Layouts
 
-### AuthLayout — `src/layouts/AuthLayout.tsx`
-- Centered card on full-height page
-- CSS Module for card styling
-- Contains `<Outlet />`
+### AuthLayout  `src/layouts/AuthLayout.tsx`
+- Centered card on full-height page (vertically + horizontally centered)
+- Contains `<Outlet />` for child pages
+- Use: Login, Register pages
 
-### MainLayout — `src/layouts/MainLayout.tsx`
-- Top nav with brand, links (Dashboard, Admin for admins), Logout
-- Uses `useAuth()` for role check and logout
-- CSS Module for nav + Tailwind for page structure
+### MainLayout  `src/layouts/MainLayout.tsx`
+- Top navbar with app name and navigation links: **Dashboard** (`/`), and if user role is `"Admin"` also **Admin** (`/admin/categories`)
+- Read token/role from `localStorage`
+- Logout button: clears `localStorage`, redirects to `/login`
+- Contains `<Outlet />` below navbar
 
-### AdminLayout — `src/layouts/AdminLayout.tsx`
-- Left sidebar with NavLink (active state via classnames)
-- CSS Module for sidebar
-- Contains `<Outlet />`
+### AdminLayout  `src/layouts/AdminLayout.tsx`
+- Left sidebar with navigation links: **Categories** (`/admin/categories`)
+- Contains `<Outlet />` next to sidebar (side-by-side layout)
+- Wrap with `<AdminRoute>` at the router level, not inside the layout itself
 
 ---
 
 ## Pages
 
-### LoginPage — `src/pages/LoginPage.tsx`
-- React Hook Form with `loginSchema` from Yup
-- POST `/api/auth/login`, calls `login(token)` from AuthContext
-- Link to register page
+### LoginPage  `src/pages/LoginPage.tsx`
+- Form: email input, password input, submit button
+- On submit: POST to `/api/auth/login` with `{ email, password }`
+- On success: save token to `localStorage.setItem("token", token)`, redirect to `/`
+- On error: show error message
 
-### RegisterPage — `src/pages/RegisterPage.tsx`
-- React Hook Form with `registerSchema` from Yup
-- POST `/api/auth/register`, calls `login(token)` from AuthContext
+### RegisterPage  `src/pages/RegisterPage.tsx`
+- Form: email input, password input, submit button
+- On submit: POST to `/api/auth/register`
+- On success: save token, redirect to `/`
+- On error: show error message
 - Link to login page
 
-### DashboardPage — `src/pages/DashboardPage.tsx`
-- SWR hooks: `useExpenses()`, `useCategories()`
-- Total sum via `lodash.sumBy`
-- Dates formatted via `date-fns`
-- Category filter dropdown
-- Edit/Delete per row, delete revalidates via `mutate()`
+### DashboardPage  `src/pages/DashboardPage.tsx`
+- Fetch expenses from GET `/api/expenses`
+- Fetch categories from GET `/api/categories`
+- Show total sum of all expenses
+- Filter by category (dropdown)
+- Table/list of expenses: date, description, amount, category name (colored badge using category.color)
+- Links to edit each expense (`/expenses/:id/edit`)
+- Button to add new expense (`/expenses/new`)
+- Delete button per expense (calls DELETE `/api/expenses/:id`)
 
-### ExpenseFormPage — `src/pages/ExpenseFormPage.tsx`
-- React Hook Form with `expenseSchema`
-- SWR: `useExpense(id)` for edit mode, `useCategories()` for select
-- `reset()` populates form when data loads
-- POST or PUT, then navigate to `/`
+### ExpenseFormPage  `src/pages/ExpenseFormPage.tsx`
+- Used for both **add** (`/expenses/new`) and **edit** (`/expenses/:id/edit`)
+- Detect mode from `useParams`  if `id` present, load existing expense and pre-fill form
+- Form fields: amount (number), description (text), date (date picker), category (select from fetched categories)
+- On submit add: POST `/api/expenses`, on submit edit: PUT `/api/expenses/:id`
+- On success: redirect to `/`
 
-### CategoriesPage — `src/pages/admin/CategoriesPage.tsx`
-- SWR: `useCategories()` with `mutate()` on delete
-- Table with color swatch, name, edit/delete buttons
+### CategoriesPage  `src/pages/admin/CategoriesPage.tsx`
+- Fetch all categories from GET `/api/categories`
+- Table with columns: color swatch, name, edit button, delete button
+- Delete calls DELETE `/api/categories/:id` and refetches
+- Button to add new category (`/admin/categories/new`)
 
-### CategoryFormPage — `src/pages/admin/CategoryFormPage.tsx`
-- React Hook Form with `categorySchema`
-- SWR: `useCategory(id)` for edit mode
-- Color picker + hex display via `watch('color')`
-- POST or PUT, then navigate to `/admin/categories`
+### CategoryFormPage  `src/pages/admin/CategoryFormPage.tsx`
+- Used for both **add** (`/admin/categories/new`) and **edit** (`/admin/categories/:id/edit`)
+- Form fields: name (text), color (color input `type="color"`)
+- On submit add: POST `/api/categories`, on submit edit: PUT `/api/categories/:id`
+- On success: redirect to `/admin/categories`
 
 ---
 
-## Routing — `src/App.tsx`
+## Route Guards
+
+### ProtectedRoute  `src/components/ProtectedRoute.tsx`
+- Check `localStorage.getItem("token")`
+- If no token  `<Navigate to="/login" replace />`
+- If token  `<Outlet />`
+
+### AdminRoute  `src/components/AdminRoute.tsx`
+- Decode JWT from `localStorage.getItem("token")`, read `role` claim
+- If role is not `"Admin"`  `<Navigate to="/" replace />`
+- If Admin  `<Outlet />`
+- Use `JSON.parse(atob(token.split(".")[1]))` to decode payload
+
+---
+
+## Routing  `src/App.tsx`
 
 ```
 /login              AuthLayout  LoginPage
@@ -196,13 +182,10 @@ All forms use `useForm()` with `yupResolver()`:
 
 ## Coding Conventions
 - Components declared with `function` keyword: `export default function LoginPage() {}`
-- All other functions (handlers, helpers, callbacks) use arrow functions
-- Import paths use `@/` alias (maps to `src/`)
-- All API calls via Axios instance from `src/api/axiosInstance.ts`
-- Data fetching via SWR hooks from `src/hooks/useData.ts`
-- Forms via React Hook Form + Yup resolvers
-- TypeScript — no `any`, use interfaces from `src/types/index.ts`
+- All other functions (handlers, helpers, callbacks) use arrow functions: `const handleSubmit = async () => {}`
+- `useState` + `useEffect` for data fetching (no external state library)
+- All API calls via the axios instance from `src/api/axiosInstance.ts`
+- TypeScript — no `any`, use the interfaces defined above
 - Indentation: 2 spaces, no tabs
-- Single quotes for strings (enforced by Prettier)
-- Styling: Tailwind CSS utilities + co-located CSS Modules
-- Pre-commit: ESLint + Prettier via husky + lint-staged
+- Single quotes for strings
+- Keep CSS minimal  inline styles or basic className strings (no CSS framework required)

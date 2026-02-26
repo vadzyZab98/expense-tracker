@@ -3,9 +3,6 @@
         "dotnet add": true,
         "Get-Item": true,
         "Set-Content": true,
-        "New-Item": true,
-        "npx tsc": true,
-        "npx vite": true,
-        "dotnet run": true
+        "New-Item": true
     }
 }
