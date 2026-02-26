@@ -100,6 +100,7 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | Method | Endpoint             | Auth                  | Body              | Response     |
 |--------|----------------------|-----------------------|-------------------|--------------|
 | GET    | /api/categories      | public                |                  | 200 + array  |
+| GET    | /api/categories/{id} | public                |                  | 200 + object |
 | POST   | /api/categories      | Admin or SuperAdmin   | `{ name, color }` | 201 + object |
 | PUT    | /api/categories/{id} | Admin or SuperAdmin   | `{ name, color }` | 204          |
 | DELETE | /api/categories/{id} | Admin or SuperAdmin   |                  | 204          |

@@ -91,7 +91,11 @@ export default function CategoryFormPage() {
               <Space>
                 <ColorPicker
                   value={values.color}
-                  onChange={(_, hex) => setFieldValue('color', hex)}
+                  disabledAlpha
+                  onChange={(color) => {
+                    const hex = color.toHexString().slice(0, 7);
+                    setFieldValue('color', hex);
+                  }}
                 />
                 <Typography.Text code>{values.color}</Typography.Text>
               </Space>

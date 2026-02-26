@@ -320,6 +320,16 @@ All 110 tests pass.
 
 ---
 
+### Step 21 — GET category by ID endpoint
+**Agent:** GitHub Copilot
+**Prompt:**
+> Add a GET /api/categories/{id} endpoint.
+
+**Result:** Created `GetCategoryByIdQuery` + `GetCategoryByIdQueryHandler` in Logic layer, added `GetById` action to `CategoriesController`, added 2 unit tests. Build and tests pass.
+**Accepted/Changed:** Accepted as-is.
+
+---
+
 ## Insights
 
 > *To be filled after project completion*

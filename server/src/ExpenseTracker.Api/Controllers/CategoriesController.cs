@@ -1,6 +1,7 @@
 using ExpenseTracker.Logic.Categories.CreateCategory;
 using ExpenseTracker.Logic.Categories.DeleteCategory;
 using ExpenseTracker.Logic.Categories.GetCategories;
+using ExpenseTracker.Logic.Categories.GetCategoryById;
 using ExpenseTracker.Logic.Categories.UpdateCategory;
 using ExpenseTracker.Logic.DTOs;
 using MediatR;
@@ -25,6 +26,16 @@ public class CategoriesController : ApiControllerBase
     {
         var result = await _mediator.Send(new GetCategoriesQuery(), ct);
         return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCategoryByIdQuery(id), ct);
+        return result.IsSuccess ? Ok(result.Value) : MapError(result.Error!);
     }
 
     [HttpPost]
