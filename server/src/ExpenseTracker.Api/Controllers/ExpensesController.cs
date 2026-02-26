@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using ExpenseTracker.Logic.DTOs;
 using ExpenseTracker.Logic.Expenses.CreateExpense;
 using ExpenseTracker.Logic.Expenses.DeleteExpense;
@@ -18,10 +17,6 @@ public class ExpensesController : ApiControllerBase
     private readonly IMediator _mediator;
 
     public ExpensesController(IMediator mediator) => _mediator = mediator;
-
-    private int CurrentUserId =>
-        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
-                  ?? User.FindFirstValue("sub")!);
 
     public record ExpenseRequest(decimal Amount, string Description, DateTime Date, int CategoryId);
 

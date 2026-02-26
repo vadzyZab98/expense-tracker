@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ExpenseTracker.Logic.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,19 @@ namespace ExpenseTracker.Api.Controllers;
 [ApiController]
 public abstract class ApiControllerBase : ControllerBase
 {
+    protected int CurrentUserId
+    {
+        get
+        {
+            var value = User.FindFirstValue("sub")
+                        ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return int.TryParse(value, out var id)
+                ? id
+                : throw new InvalidOperationException("User ID claim is missing or malformed.");
+        }
+    }
+
     protected IActionResult MapError(DomainError error)
     {
         var problem = new ProblemDetails

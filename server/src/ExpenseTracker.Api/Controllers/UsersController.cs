@@ -1,3 +1,4 @@
+using ExpenseTracker.Api.Auth;
 using ExpenseTracker.Logic.DTOs;
 using ExpenseTracker.Logic.Users.AssignRole;
 using ExpenseTracker.Logic.Users.GetUsers;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [Route("api/users")]
-[Authorize(Roles = "SuperAdmin")]
+[Authorize(Policy = ApiPolicies.CanManageUsers)]
 public class UsersController : ApiControllerBase
 {
     private readonly IMediator _mediator;

@@ -1,3 +1,4 @@
+using ExpenseTracker.Api.Auth;
 using ExpenseTracker.Logic.Categories.CreateCategory;
 using ExpenseTracker.Logic.Categories.DeleteCategory;
 using ExpenseTracker.Logic.Categories.GetCategories;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [Route("api/categories")]
+[Authorize(Policy = ApiPolicies.CanManageCategories)]
 public class CategoriesController : ApiControllerBase
 {
     private readonly IMediator _mediator;
@@ -39,7 +41,6 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,SuperAdmin")]
     [ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create(CategoryRequest request, CancellationToken ct)
@@ -51,7 +52,6 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status422UnprocessableEntity)]
@@ -62,7 +62,6 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]

@@ -35,7 +35,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key))
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(ApiPolicies.CanManageCategories, p =>
+        p.RequireRole(ApiRoles.Admin, ApiRoles.SuperAdmin));
+
+    options.AddPolicy(ApiPolicies.CanManageUsers, p =>
+        p.RequireRole(ApiRoles.SuperAdmin));
+});
 
 // CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
