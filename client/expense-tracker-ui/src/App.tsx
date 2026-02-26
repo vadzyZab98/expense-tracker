@@ -4,8 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import AuthFormPage from './pages/AuthFormPage';
 import DashboardPage from './pages/DashboardPage';
 import ExpenseFormPage from './pages/ExpenseFormPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
@@ -16,8 +15,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<AuthFormPage mode="login" />} />
+        <Route path="/register" element={<AuthFormPage mode="register" />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

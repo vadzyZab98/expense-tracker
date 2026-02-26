@@ -1,28 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axiosInstance';
-
-interface Category {
-  id: number;
-  name: string;
-  color: string;
-}
-
-interface Expense {
-  id: number;
-  userId: number;
-  categoryId: number;
-  category?: Category;
-  amount: number;
-  description: string;
-  date: string;
-}
+import { Table, Button, Tag, Select, Space, Alert, Modal, Typography, message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { expenseApi } from '../api/expenseApi';
+import { categoryApi } from '../api/categoryApi';
+import type { Expense, Category } from '../types/models';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [filterCategoryId, setFilterCategoryId] = useState<string>('');
+  const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -30,12 +19,12 @@ export default function DashboardPage() {
     setLoading(true);
     setError('');
     try {
-      const [expensesRes, categoriesRes] = await Promise.all([
-        api.get<Expense[]>('/api/expenses'),
-        api.get<Category[]>('/api/categories'),
+      const [expensesData, categoriesData] = await Promise.all([
+        expenseApi.getAll(),
+        categoryApi.getAll(),
       ]);
-      setExpenses(expensesRes.data);
-      setCategories(categoriesRes.data);
+      setExpenses(expensesData);
+      setCategories(categoriesData);
     } catch {
       setError('Failed to load data.');
     } finally {
@@ -45,143 +34,111 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this expense?')) return;
-    try {
-      await api.delete(`/api/expenses/${id}`);
-      setExpenses((prev) => prev.filter((e) => e.id !== id));
-    } catch {
-      alert('Failed to delete expense.');
-    }
+  const handleDelete = (id: number) => {
+    Modal.confirm({
+      title: 'Delete this expense?',
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await expenseApi.remove(id);
+          setExpenses((prev) => prev.filter((e) => e.id !== id));
+          message.success('Expense deleted.');
+        } catch {
+          message.error('Failed to delete expense.');
+        }
+      },
+    });
   };
 
   const getCategoryById = (id: number) => categories.find((c) => c.id === id);
 
   const filtered = filterCategoryId
-    ? expenses.filter((e) => e.categoryId === Number(filterCategoryId))
+    ? expenses.filter((e) => e.categoryId === filterCategoryId)
     : expenses;
 
   const total = filtered.reduce((sum, e) => sum + e.amount, 0);
 
+  const columns: ColumnsType<Expense> = [
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date: string) => new Date(date).toLocaleDateString(),
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Category',
+      dataIndex: 'categoryId',
+      key: 'category',
+      render: (_: number, record: Expense) => {
+        const cat = record.category ?? getCategoryById(record.categoryId);
+        return cat ? <Tag color={cat.color}>{cat.name}</Tag> : '—';
+      },
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right',
+      render: (amount: number) => `$${amount.toFixed(2)}`,
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      align: 'center',
+      render: (_: unknown, record: Expense) => (
+        <Space>
+          <Button size="small" icon={<EditOutlined />} onClick={() => navigate(`/expenses/${record.id}/edit`)}>
+            Edit
+          </Button>
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>
+            Delete
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0 }}>My Expenses</h2>
-        <button
-          onClick={() => navigate('/expenses/new')}
-          style={{ padding: '8px 18px', backgroundColor: '#1677ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
-        >
-          + New Expense
-        </button>
-      </div>
+    <div style={{ padding: 24 }}>
+      <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Typography.Title level={4} style={{ margin: 0 }}>My Expenses</Typography.Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/expenses/new')}>
+          New Expense
+        </Button>
+      </Space>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-        <label style={{ fontWeight: 500 }}>Filter by category:</label>
-        <select
+      <Space style={{ marginBottom: 16 }}>
+        <Typography.Text strong>Filter by category:</Typography.Text>
+        <Select
+          allowClear
+          placeholder="All"
           value={filterCategoryId}
-          onChange={(e) => setFilterCategoryId(e.target.value)}
-          style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #d9d9d9', fontSize: '14px' }}
-        >
-          <option value=''>All</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <span style={{ marginLeft: 'auto', fontWeight: 600, fontSize: '16px' }}>
+          onChange={(val) => setFilterCategoryId(val ?? null)}
+          style={{ width: 200 }}
+          options={categories.map((c) => ({ label: c.name, value: c.id }))}
+        />
+        <Typography.Text strong style={{ fontSize: 16 }}>
           Total: ${total.toFixed(2)}
-        </span>
-      </div>
+        </Typography.Text>
+      </Space>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: '#ff4d4f' }}>{error}</p>}
+      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />}
 
-      {!loading && !error && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#fafafa', textAlign: 'left' }}>
-              <th style={thStyle}>Date</th>
-              <th style={thStyle}>Description</th>
-              <th style={thStyle}>Category</th>
-              <th style={{ ...thStyle, textAlign: 'right' }}>Amount</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 && (
-              <tr><td colSpan={5} style={{ padding: '16px', textAlign: 'center', color: '#888' }}>No expenses found.</td></tr>
-            )}
-            {filtered.map((expense) => {
-              const cat = expense.category ?? getCategoryById(expense.categoryId);
-              return (
-                <tr key={expense.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <td style={tdStyle}>{new Date(expense.date).toLocaleDateString()}</td>
-                  <td style={tdStyle}>{expense.description}</td>
-                  <td style={tdStyle}>
-                    {cat ? (
-                      <span style={{
-                        backgroundColor: cat.color,
-                        color: '#fff',
-                        padding: '2px 10px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                      }}>
-                        {cat.name}
-                      </span>
-                    ) : '—'}
-                  </td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>${expense.amount.toFixed(2)}</td>
-                  <td style={{ ...tdStyle, textAlign: 'center' }}>
-                    <button
-                      onClick={() => navigate(`/expenses/${expense.id}/edit`)}
-                      style={editBtnStyle}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(expense.id)}
-                      style={deleteBtnStyle}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+      <Table<Expense>
+        columns={columns}
+        dataSource={filtered}
+        rowKey="id"
+        loading={loading}
+        pagination={false}
+        locale={{ emptyText: 'No expenses found.' }}
+      />
     </div>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  padding: '10px 12px',
-  borderBottom: '2px solid #f0f0f0',
-  fontWeight: 600,
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '10px 12px',
-};
-
-const editBtnStyle: React.CSSProperties = {
-  marginRight: '8px',
-  padding: '4px 12px',
-  backgroundColor: '#fff',
-  border: '1px solid #1677ff',
-  color: '#1677ff',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '13px',
-};
-
-const deleteBtnStyle: React.CSSProperties = {
-  padding: '4px 12px',
-  backgroundColor: '#fff',
-  border: '1px solid #ff4d4f',
-  color: '#ff4d4f',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '13px',
-};

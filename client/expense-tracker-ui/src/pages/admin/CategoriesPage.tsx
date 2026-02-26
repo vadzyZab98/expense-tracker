@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axiosInstance';
-
-interface Category {
-  id: number;
-  name: string;
-  color: string;
-}
+import { Table, Button, Tag, Space, Alert, Modal, Typography, message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { categoryApi } from '../../api/categoryApi';
+import type { Category } from '../../types/models';
 
 export default function CategoriesPage() {
   const navigate = useNavigate();
@@ -18,8 +16,7 @@ export default function CategoriesPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await api.get<Category[]>('/api/categories');
-      setCategories(res.data);
+      setCategories(await categoryApi.getAll());
     } catch {
       setError('Failed to load categories.');
     } finally {
@@ -29,108 +26,74 @@ export default function CategoriesPage() {
 
   useEffect(() => { fetchCategories(); }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this category?')) return;
-    try {
-      await api.delete(`/api/categories/${id}`);
-      setCategories((prev) => prev.filter((c) => c.id !== id));
-    } catch {
-      alert('Failed to delete category.');
-    }
+  const handleDelete = (id: number) => {
+    Modal.confirm({
+      title: 'Delete this category?',
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await categoryApi.remove(id);
+          setCategories((prev) => prev.filter((c) => c.id !== id));
+          message.success('Category deleted.');
+        } catch {
+          message.error('Failed to delete category.');
+        }
+      },
+    });
   };
 
+  const columns: ColumnsType<Category> = [
+    {
+      title: 'Color',
+      dataIndex: 'color',
+      key: 'color',
+      width: 80,
+      render: (color: string) => <Tag color={color}>{'\u00A0\u00A0\u00A0'}</Tag>,
+    },
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      align: 'center',
+      width: 200,
+      render: (_: unknown, record: Category) => (
+        <Space>
+          <Button size="small" icon={<EditOutlined />} onClick={() => navigate(`/admin/categories/${record.id}/edit`)}>
+            Edit
+          </Button>
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>
+            Delete
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0 }}>Categories</h2>
-        <button
-          onClick={() => navigate('/admin/categories/new')}
-          style={{ padding: '8px 18px', backgroundColor: '#1677ff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
-        >
-          + New Category
-        </button>
-      </div>
+    <div style={{ padding: 24 }}>
+      <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Typography.Title level={4} style={{ margin: 0 }}>Categories</Typography.Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/admin/categories/new')}>
+          New Category
+        </Button>
+      </Space>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: '#ff4d4f' }}>{error}</p>}
+      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />}
 
-      {!loading && !error && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#fafafa', textAlign: 'left' }}>
-              <th style={thStyle}>Color</th>
-              <th style={thStyle}>Name</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.length === 0 && (
-              <tr><td colSpan={3} style={{ padding: '16px', textAlign: 'center', color: '#888' }}>No categories yet.</td></tr>
-            )}
-            {categories.map((cat) => (
-              <tr key={cat.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                <td style={tdStyle}>
-                  <span style={{
-                    display: 'inline-block',
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '4px',
-                    backgroundColor: cat.color,
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    verticalAlign: 'middle',
-                  }} />
-                </td>
-                <td style={tdStyle}>{cat.name}</td>
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <button
-                    onClick={() => navigate(`/admin/categories/${cat.id}/edit`)}
-                    style={editBtnStyle}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat.id)}
-                    style={deleteBtnStyle}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <Table<Category>
+        columns={columns}
+        dataSource={categories}
+        rowKey="id"
+        loading={loading}
+        pagination={false}
+        locale={{ emptyText: 'No categories yet.' }}
+      />
     </div>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  padding: '10px 12px',
-  borderBottom: '2px solid #f0f0f0',
-  fontWeight: 600,
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '10px 12px',
-};
-
-const editBtnStyle: React.CSSProperties = {
-  marginRight: '8px',
-  padding: '4px 12px',
-  backgroundColor: '#fff',
-  border: '1px solid #1677ff',
-  color: '#1677ff',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '13px',
-};
-
-const deleteBtnStyle: React.CSSProperties = {
-  padding: '4px 12px',
-  backgroundColor: '#fff',
-  border: '1px solid #ff4d4f',
-  color: '#ff4d4f',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '13px',
-};
