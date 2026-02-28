@@ -15,6 +15,9 @@ export default function MainLayout() {
     navigate('/login');
   };
 
+  const dashboardPaths = ['/', '/incomes', '/budgets'];
+  const selectedKey = dashboardPaths.includes(location.pathname) ? '/' : location.pathname;
+
   const menuItems = [
     { key: '/', icon: <DashboardOutlined />, label: 'Dashboard' },
     ...((role === 'Admin' || role === 'SuperAdmin')
@@ -31,7 +34,7 @@ export default function MainLayout() {
         <Menu
           theme="dark"
           mode="horizontal"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           style={{ flex: 1, minWidth: 0 }}

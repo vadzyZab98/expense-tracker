@@ -48,9 +48,9 @@ test: {
 
 ## Test Location & Naming
 
-- Tests live **next to the code** in a `__tests__/` folder
+- Tests live **next to the code** in a `__tests__/` folder within each feature folder
 - Naming: `<ModuleName>.test.ts` (pure logic) or `<ModuleName>.test.tsx` (component rendering)
-- Example: `src/pages/__tests__/AuthFormPage.test.ts`
+- Example: `src/pages/auth/__tests__/AuthFormPage.test.ts`
 
 ---
 
@@ -70,7 +70,7 @@ test: {
 
 ```ts
 import { ValidationError } from 'yup';
-import { mySchema } from '../MyComponent';
+import { mySchema } from '../schemas/mySchema';
 
 describe('mySchema', () => {
   it('accepts valid data', () => {
@@ -134,20 +134,24 @@ describe('MyComponent', () => {
 
 | Module | Export | Fields |
 |--------|--------|--------|
-| `src/pages/AuthFormPage.tsx` | `loginSchema` | email (required, email format), password (required) |
-| `src/pages/AuthFormPage.tsx` | `registerSchema` | email (required, email format), password (required, min 8 chars) |
-| `src/pages/ExpenseFormPage.tsx` | `expenseSchema` | amount (required, min 0.01), description (required), date (required), categoryId (required, min 1) |
-| `src/pages/admin/CategoryFormPage.tsx` | `categorySchema` | name (required), color (required, hex format `#RRGGBB`) |
+| `src/pages/auth/authSchemas.ts` | `loginSchema` | email (required, email format), password (required) |
+| `src/pages/auth/authSchemas.ts` | `registerSchema` | email (required, email format), password (required, min 8 chars) |
+| `src/pages/expenses/expenseSchema.ts` | `expenseSchema` | amount (required, min 0.01), description (required), date (required), categoryId (required, min 1) |
+| `src/pages/income/incomeSchema.ts` | `incomeSchema` | amount (required, min 0.01), date (required), incomeCategoryId (required, min 1) |
+| `src/pages/budgets/budgetSchema.ts` | `budgetSchema` | categoryId (required, min 1), year (required, 2000–2100), month (required, 1–12), amount (required, min 0.01) |
+| `src/pages/admin/categories/categorySchema.ts` | `categorySchema` | name (required), color (required, hex format `#RRGGBB`) |
+| `src/pages/admin/income-categories/incomeCategorySchema.ts` | `incomeCategorySchema` | name (required), color (required, hex format `#RRGGBB`) |
 
 ---
 
 ## Existing Tests
 
 ```
-src/pages/__tests__/
+src/pages/auth/__tests__/
   AuthFormPage.test.ts          ✅ done — loginSchema + registerSchema validation
+src/pages/expenses/__tests__/
   ExpenseFormPage.test.ts       ✅ done — expenseSchema validation
-src/pages/admin/__tests__/
+src/pages/admin/categories/__tests__/
   CategoryFormPage.test.ts      ✅ done — categorySchema validation
 ```
 

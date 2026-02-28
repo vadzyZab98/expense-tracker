@@ -43,7 +43,10 @@ public sealed class MonthlyBudgetRepository : IMonthlyBudgetRepository
 
     public async Task<decimal> GetTotalForMonthAsync(
         int userId, int year, int month, CancellationToken ct = default)
-        => await _db.MonthlyBudgets
+    {
+        var total = await _db.MonthlyBudgets
             .Where(b => b.UserId == userId && b.Year == year && b.Month == month)
-            .SumAsync(b => b.Amount, ct);
+            .SumAsync(b => (double)b.Amount, ct);
+        return (decimal)total;
+    }
 }

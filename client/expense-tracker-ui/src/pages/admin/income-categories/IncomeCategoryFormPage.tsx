@@ -1,28 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 import { Form, Input, ColorPicker, Button, Alert, Spin, Typography, Space } from 'antd';
-import { categoryApi } from '../../api/categoryApi';
+import { incomeCategoryApi } from '../../../api/incomeCategoryApi';
+import { extractErrorDetail } from '../../../utils/errorUtils';
+import { incomeCategorySchema } from './incomeCategorySchema';
 
-export const categorySchema = Yup.object({
-  name: Yup.string().required('Name is required'),
-  color: Yup.string()
-    .matches(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color')
-    .required('Color is required'),
-});
-
-interface CategoryFormValues {
+interface IncomeCategoryFormValues {
   name: string;
   color: string;
 }
 
-export default function CategoryFormPage() {
+export default function IncomeCategoryFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
 
-  const [initialValues, setInitialValues] = useState<CategoryFormValues | null>(isEdit ? null : { name: '', color: '#1677ff' });
+  const [initialValues, setInitialValues] = useState<IncomeCategoryFormValues | null>(isEdit ? null : { name: '', color: '#52c41a' });
   const [fetching, setFetching] = useState(isEdit);
   const [error, setError] = useState('');
 
@@ -30,10 +24,10 @@ export default function CategoryFormPage() {
     if (!isEdit) return;
     const load = async () => {
       try {
-        const cat = await categoryApi.getById(Number(id));
+        const cat = await incomeCategoryApi.getById(Number(id));
         setInitialValues({ name: cat.name, color: cat.color });
       } catch {
-        setError('Failed to load category.');
+        setError('Failed to load income category.');
       } finally {
         setFetching(false);
       }
@@ -48,23 +42,23 @@ export default function CategoryFormPage() {
   return (
     <div style={{ padding: 24, maxWidth: 400 }}>
       <Typography.Title level={4} style={{ marginTop: 0 }}>
-        {isEdit ? 'Edit Category' : 'New Category'}
+        {isEdit ? 'Edit Income Category' : 'New Income Category'}
       </Typography.Title>
 
-      <Formik<CategoryFormValues>
+      <Formik<IncomeCategoryFormValues>
         initialValues={initialValues}
-        validationSchema={categorySchema}
+        validationSchema={incomeCategorySchema}
         enableReinitialize
         onSubmit={async (values, { setStatus }) => {
           try {
             if (isEdit) {
-              await categoryApi.update(Number(id), values);
+              await incomeCategoryApi.update(Number(id), values);
             } else {
-              await categoryApi.create(values);
+              await incomeCategoryApi.create(values);
             }
-            navigate('/admin/categories');
-          } catch {
-            setStatus('Failed to save category.');
+            navigate('/admin/income-categories');
+          } catch (err) {
+            setStatus(extractErrorDetail(err));
           }
         }}
       >
@@ -109,7 +103,7 @@ export default function CategoryFormPage() {
                 <Button type="primary" htmlType="submit" loading={isSubmitting}>
                   {isEdit ? 'Update' : 'Create'}
                 </Button>
-                <Button onClick={() => navigate('/admin/categories')}>Cancel</Button>
+                <Button onClick={() => navigate('/admin/income-categories')}>Cancel</Button>
               </Space>
             </Form.Item>
           </Form>
@@ -118,4 +112,3 @@ export default function CategoryFormPage() {
     </div>
   );
 }
-

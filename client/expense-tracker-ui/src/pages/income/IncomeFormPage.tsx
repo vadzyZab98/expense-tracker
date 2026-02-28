@@ -1,34 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { Form, Input, InputNumber, DatePicker, Select, Button, Alert, Spin, Typography, Space } from 'antd';
+import { Form, InputNumber, DatePicker, Select, Button, Alert, Spin, Typography, Space } from 'antd';
 import dayjs from 'dayjs';
-import { expenseApi } from '../api/expenseApi';
-import { categoryApi } from '../api/categoryApi';
-import type { Category } from '../types/models';
+import { incomeApi } from '../../api/incomeApi';
+import { incomeCategoryApi } from '../../api/incomeCategoryApi';
+import { extractErrorDetail } from '../../utils/errorUtils';
+import { incomeSchema } from './incomeSchema';
+import type { IncomeCategory } from '../../types/models';
 
-export const expenseSchema = Yup.object({
-  amount: Yup.number().min(0.01, 'Amount must be greater than 0').required('Amount is required'),
-  description: Yup.string().required('Description is required'),
-  date: Yup.string().required('Date is required'),
-  categoryId: Yup.number().min(1, 'Category is required').required('Category is required'),
-});
-
-interface ExpenseFormValues {
+interface IncomeFormValues {
   amount: number;
-  description: string;
   date: string;
-  categoryId: number;
+  incomeCategoryId: number;
 }
 
-export default function ExpenseFormPage() {
+export default function IncomeFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [initialValues, setInitialValues] = useState<ExpenseFormValues | null>(null);
+  const [incomeCategories, setIncomeCategories] = useState<IncomeCategory[]>([]);
+  const [initialValues, setInitialValues] = useState<IncomeFormValues | null>(null);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
 
@@ -36,23 +29,21 @@ export default function ExpenseFormPage() {
     const loadData = async () => {
       setFetching(true);
       try {
-        const cats = await categoryApi.getAll();
-        setCategories(cats);
+        const cats = await incomeCategoryApi.getAll();
+        setIncomeCategories(cats);
 
         if (isEdit) {
-          const expense = await expenseApi.getById(Number(id));
+          const income = await incomeApi.getById(Number(id));
           setInitialValues({
-            amount: expense.amount,
-            description: expense.description,
-            date: expense.date.slice(0, 10),
-            categoryId: expense.categoryId,
+            amount: income.amount,
+            date: income.date.slice(0, 10),
+            incomeCategoryId: income.incomeCategoryId,
           });
         } else {
           setInitialValues({
             amount: 0,
-            description: '',
             date: dayjs().format('YYYY-MM-DD'),
-            categoryId: cats.length > 0 ? cats[0].id : 0,
+            incomeCategoryId: cats.length > 0 ? cats[0].id : 0,
           });
         }
       } catch {
@@ -71,12 +62,12 @@ export default function ExpenseFormPage() {
   return (
     <div style={{ padding: 24, maxWidth: 480 }}>
       <Typography.Title level={4} style={{ marginTop: 0 }}>
-        {isEdit ? 'Edit Expense' : 'New Expense'}
+        {isEdit ? 'Edit Income' : 'New Income'}
       </Typography.Title>
 
-      <Formik<ExpenseFormValues>
+      <Formik<IncomeFormValues>
         initialValues={initialValues}
-        validationSchema={expenseSchema}
+        validationSchema={incomeSchema}
         enableReinitialize
         onSubmit={async (values, { setStatus }) => {
           try {
@@ -85,17 +76,17 @@ export default function ExpenseFormPage() {
               date: new Date(values.date).toISOString(),
             };
             if (isEdit) {
-              await expenseApi.update(Number(id), payload);
+              await incomeApi.update(Number(id), payload);
             } else {
-              await expenseApi.create(payload);
+              await incomeApi.create(payload);
             }
-            navigate('/');
-          } catch {
-            setStatus('Failed to save expense.');
+            navigate('/incomes');
+          } catch (err) {
+            setStatus(extractErrorDetail(err));
           }
         }}
       >
-        {({ values, errors, touched, status, isSubmitting, setFieldValue, setFieldTouched, handleChange, handleBlur, handleSubmit }) => (
+        {({ values, errors, touched, status, isSubmitting, setFieldValue, setFieldTouched, handleSubmit }) => (
           <Form layout="vertical" onFinish={handleSubmit}>
             <Form.Item
               label="Amount"
@@ -113,19 +104,6 @@ export default function ExpenseFormPage() {
             </Form.Item>
 
             <Form.Item
-              label="Description"
-              validateStatus={touched.description && errors.description ? 'error' : undefined}
-              help={touched.description && errors.description}
-            >
-              <Input
-                name="description"
-                value={values.description}
-                onChange={handleChange}
-                onBlur={handleBlur}
-              />
-            </Form.Item>
-
-            <Form.Item
               label="Date"
               validateStatus={touched.date && errors.date ? 'error' : undefined}
               help={touched.date && errors.date}
@@ -139,15 +117,15 @@ export default function ExpenseFormPage() {
             </Form.Item>
 
             <Form.Item
-              label="Category"
-              validateStatus={touched.categoryId && errors.categoryId ? 'error' : undefined}
-              help={touched.categoryId && errors.categoryId}
+              label="Income Category"
+              validateStatus={touched.incomeCategoryId && errors.incomeCategoryId ? 'error' : undefined}
+              help={touched.incomeCategoryId && errors.incomeCategoryId}
             >
               <Select
-                value={values.categoryId}
-                onChange={(val) => setFieldValue('categoryId', val)}
-                onBlur={() => setFieldTouched('categoryId', true)}
-                options={categories.map((c) => ({ label: c.name, value: c.id }))}
+                value={values.incomeCategoryId}
+                onChange={(val) => setFieldValue('incomeCategoryId', val)}
+                onBlur={() => setFieldTouched('incomeCategoryId', true)}
+                options={incomeCategories.map((c) => ({ label: c.name, value: c.id }))}
               />
             </Form.Item>
 
@@ -159,7 +137,7 @@ export default function ExpenseFormPage() {
                 <Button type="primary" htmlType="submit" loading={isSubmitting}>
                   {isEdit ? 'Update' : 'Create'}
                 </Button>
-                <Button onClick={() => navigate('/')}>Cancel</Button>
+                <Button onClick={() => navigate('/incomes')}>Cancel</Button>
               </Space>
             </Form.Item>
           </Form>

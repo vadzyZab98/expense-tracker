@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Table, Tag, Button, Alert, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { userApi } from '../../api/userApi';
-import type { User } from '../../types/models';
+import { userApi } from '../../../api/userApi';
+import type { User } from '../../../types/models';
 
 const roleColorMap: Record<string, string> = {
   SuperAdmin: 'purple',

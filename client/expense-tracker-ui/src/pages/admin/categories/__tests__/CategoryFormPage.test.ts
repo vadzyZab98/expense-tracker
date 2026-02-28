@@ -1,5 +1,5 @@
 import { ValidationError } from 'yup';
-import { categorySchema } from '../CategoryFormPage';
+import { categorySchema } from '../categorySchema';
 
 describe('categorySchema', () => {
   const validCategory = { name: 'Food', color: '#FF6B6B' };

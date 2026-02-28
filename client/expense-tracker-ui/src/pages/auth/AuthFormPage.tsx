@@ -1,23 +1,13 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 import { Form, Input, Button, Alert, Typography } from 'antd';
-import { useAuth } from '../context/AuthContext';
-import { authApi } from '../api/authApi';
+import { useAuth } from '../../context/AuthContext';
+import { authApi } from '../../api/authApi';
+import { loginSchema, registerSchema } from './authSchemas';
 
 interface AuthFormPageProps {
   mode: 'login' | 'register';
 }
-
-export const loginSchema = Yup.object({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().required('Password is required'),
-});
-
-export const registerSchema = Yup.object({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-});
 
 export default function AuthFormPage({ mode }: AuthFormPageProps) {
   const navigate = useNavigate();

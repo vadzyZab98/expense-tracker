@@ -33,7 +33,10 @@ public sealed class IncomeRepository : IIncomeRepository
 
     public async Task<decimal> GetTotalForMonthAsync(
         int userId, int year, int month, CancellationToken ct = default)
-        => await _db.Incomes
+    {
+        var total = await _db.Incomes
             .Where(i => i.UserId == userId && i.Date.Year == year && i.Date.Month == month)
-            .SumAsync(i => i.Amount, ct);
+            .SumAsync(i => (double)i.Amount, ct);
+        return (decimal)total;
+    }
 }

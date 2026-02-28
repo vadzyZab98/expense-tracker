@@ -1,5 +1,5 @@
 import { ValidationError } from 'yup';
-import { loginSchema, registerSchema } from '../AuthFormPage';
+import { loginSchema, registerSchema } from '../authSchemas';
 
 describe('loginSchema', () => {
   it('accepts valid login data', async () => {

@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
-import { AppstoreOutlined, TeamOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, TeamOutlined, ArrowLeftOutlined, DollarOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
 const { Sider, Content } = Layout;
@@ -12,6 +12,7 @@ export default function AdminLayout() {
 
   const menuItems = [
     { key: '/admin/categories', icon: <AppstoreOutlined />, label: 'Categories' },
+    { key: '/admin/income-categories', icon: <DollarOutlined />, label: 'Income Categories' },
     ...(role === 'SuperAdmin'
       ? [{ key: '/admin/users', icon: <TeamOutlined />, label: 'Users' }]
       : []),

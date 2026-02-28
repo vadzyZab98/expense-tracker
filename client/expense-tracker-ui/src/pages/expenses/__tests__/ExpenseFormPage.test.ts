@@ -1,5 +1,5 @@
 import { ValidationError } from 'yup';
-import { expenseSchema } from '../ExpenseFormPage';
+import { expenseSchema } from '../expenseSchema';
 
 describe('expenseSchema', () => {
   const validExpense = {

@@ -347,6 +347,81 @@ All 110 tests pass.
 
 ---
 
+### Step 23 — Income-Constrained Financial UI
+**Agent:** GitHub Copilot (ui-dev)
+**Prompt:**
+> Implement UI for Income-based Monthly Financial Limits: Income page (CRUD + monthly filter + total), Budget page (budget/spent/% used + financial summary), Expense page (income/spent/remaining summary), limit behavior (disable creation when remaining=0, show 409 errors, highlight summary), admin CRUD for income categories.
+
+**Result:**
+- **Types:** Added `IncomeCategory`, `Income`, `MonthlyBudget` interfaces to `models.ts`
+- **API modules:** Created `incomeApi.ts`, `incomeCategoryApi.ts`, `budgetApi.ts`
+- **Utils:** Created `errorUtils.ts` with `extractErrorDetail()` for ProblemDetails parsing
+- **Components:** Created `FinancialSummary.tsx` reusable component (income/used/remaining cards, red highlight at limit)
+- **Dashboard restructure:** `DashboardPage.tsx` is now a tab shell with month picker and 3 tab routes via `useOutletContext`:
+  - `ExpensesTab.tsx` — expenses list, FinancialSummary, "New" disabled at limit
+  - `IncomesTab.tsx` — income list with delete guards
+  - `BudgetsTab.tsx` — budgets with spent/% used Progress bars, FinancialSummary
+- **Form pages:** `IncomeFormPage.tsx`, `BudgetFormPage.tsx` (with query-param defaults), updated `ExpenseFormPage.tsx` with 409 error detail
+- **Admin:** `IncomeCategoriesPage.tsx`, `IncomeCategoryFormPage.tsx` added to admin sidebar
+- **Routing:** Tab-based nested routing under DashboardPage; new form routes for incomes/budgets; income-categories admin routes
+- **Navigation:** MainLayout highlights Dashboard for all tab paths; AdminLayout includes Income Categories
+- **UX:** Red border + background on FinancialSummary when limit reached; tooltips on disabled buttons; explicit error messages from server; auto-refresh after mutations
+- All 30 existing tests pass. TypeScript compiles cleanly.
+
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+### Step 24 — Extract Yup schemas to co-located files
+**Agent:** GitHub Copilot (ui-dev)
+**Prompt:**
+> Move all Yup schemas to separate files in co-located `schemas/` folders next to the pages that use them.
+
+**Result:**
+- **Created** `pages/schemas/authSchemas.ts` (loginSchema, registerSchema), `expenseSchema.ts`, `incomeSchema.ts`, `budgetSchema.ts`
+- **Created** `pages/admin/schemas/categorySchema.ts`, `incomeCategorySchema.ts`
+- **Updated** 6 page files to import schemas from new files (removed inline `Yup.object` definitions and `import * as Yup`)
+- **Updated** 3 test files to import schemas from new `schemas/` paths
+- All 30 tests pass. TypeScript compiles cleanly.
+
+**Accepted/Changed:** Accepted as-is.
+
+### Step 25 — Reorganize pages into feature-based folders
+**Agent:** GitHub Copilot (ui-dev)
+**Prompt:**
+> Reorganize pages into feature-based folders where page, schema, and tests live together (e.g., `pages/income/` contains `IncomesTab.tsx`, `IncomeFormPage.tsx`, `incomeSchema.ts`).
+
+**Result:**
+- **Created** feature folders: `pages/auth/`, `pages/expenses/`, `pages/income/`, `pages/budgets/`
+- **Created** admin feature folders: `pages/admin/categories/`, `pages/admin/income-categories/`, `pages/admin/users/`
+- **Moved** each page component, its Yup schema, and its `__tests__/` folder into the corresponding feature folder
+- **Updated** all import paths in App.tsx (13 imports), all moved files (relative paths to `api/`, `utils/`, `types/`, `components/`, `DashboardPage`), and all test files (schema imports)
+- **Deleted** old flat files, empty `schemas/` folders, and old `__tests__/` folders
+- `DashboardPage.tsx` remains at `pages/` root as the tab shell
+- All 30 tests pass. TypeScript compiles cleanly.
+
+**Accepted/Changed:** Accepted as-is.
+
+---
+
+## Income-Constrained Planning
+
+The application enforces strict monthly income constraints on both expenses and budgets:
+
+### How It Works
+- **Income first:** Users must record income for a month before creating expenses or budgets.
+- **Budget planning:** Total budgets for a month cannot exceed total income. The Budgets tab shows `Total Income / Total Planned / Remaining To Allocate`.
+- **Expense tracking:** Total expenses for a month cannot exceed total income. The Expenses tab shows `Total Income / Total Spent / Remaining Available`.
+- **Income protection:** Deleting or reducing income is blocked if it would cause existing budgets or expenses to exceed the new total.
+
+### UI Behavior at Limits
+- **Financial summary cards** turn red with a warning icon when remaining reaches zero.
+- **"New Expense" and "New Budget" buttons** are disabled with a tooltip explaining why.
+- **409 Conflict errors** from the backend are displayed inline with the server's specific message (e.g., "Total expenses would exceed total income for this month.").
+- **All mutations** (create/edit/delete) auto-refresh the financial summary to reflect current state.
+
+---
+
 ## Insights
 
 > *To be filled after project completion*
