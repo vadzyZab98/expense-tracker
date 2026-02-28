@@ -30,4 +30,10 @@ public sealed class ExpenseRepository : IExpenseRepository
 
     public void Delete(Expense expense)
         => _db.Expenses.Remove(expense);
+
+    public async Task<decimal> GetTotalForMonthAsync(
+        int userId, int year, int month, CancellationToken ct = default)
+        => await _db.Expenses
+            .Where(e => e.UserId == userId && e.Date.Year == year && e.Date.Month == month)
+            .SumAsync(e => e.Amount, ct);
 }

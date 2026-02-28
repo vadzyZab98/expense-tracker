@@ -330,6 +330,23 @@ All 110 tests pass.
 
 ---
 
+### Step 22 — Strict Monthly Income Enforcement
+**Agent:** GitHub Copilot (backend-dev)
+**Prompt:**
+> Implement Strict Monthly Income Enforcement: IncomeCategory entity, Income CRUD (user-scoped), MonthlyBudget CRUD (user-scoped), constraint enforcement on expenses/budgets (total ≤ income), income modification guards (reject delete/reduce if would break budgets or expenses), zero-income rule (forbids budget and expense creation).
+
+**Result:**
+- **Core:** 3 new entities (IncomeCategory, Income, MonthlyBudget), 3 new repository interfaces, added `GetTotalForMonthAsync` to `IExpenseRepository`
+- **Logic:** 15 CQRS operations (5 per new domain), modified `CreateExpenseCommandHandler` and `UpdateExpenseCommandHandler` with income constraint checks
+- **Persistence:** 3 new EF configurations (with seed data for 4 income categories), 3 new repositories, modified `ExpenseRepository` and `AppDbContext`, generated migration
+- **API:** 3 new controllers (`IncomeCategoriesController`, `IncomesController`, `BudgetsController`)
+- **Tests:** 18 new test files, 5 modified test methods in existing expense tests. All 183 tests pass.
+- **Docs:** Created `docs/implementation-steps-be.md`, added Financial Constraints section to `copilot-instructions.md`
+
+**Accepted/Changed:** Accepted as-is.
+
+---
+
 ## Insights
 
 > *To be filled after project completion*

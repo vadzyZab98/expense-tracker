@@ -11,15 +11,18 @@ public sealed class CreateExpenseCommandHandler
 {
     private readonly IExpenseRepository _expenses;
     private readonly ICategoryRepository _categories;
+    private readonly IIncomeRepository _incomes;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateExpenseCommandHandler(
         IExpenseRepository expenses,
         ICategoryRepository categories,
+        IIncomeRepository incomes,
         IUnitOfWork unitOfWork)
     {
         _expenses = expenses;
         _categories = categories;
+        _incomes = incomes;
         _unitOfWork = unitOfWork;
     }
 
@@ -28,6 +31,22 @@ public sealed class CreateExpenseCommandHandler
         var category = await _categories.FindByIdAsync(request.CategoryId, ct);
         if (category is null)
             return Result<ExpenseResponse>.Failure(DomainError.NotFound("Category", request.CategoryId));
+
+        var year = request.Date.Year;
+        var month = request.Date.Month;
+
+        var totalIncome = await _incomes.GetTotalForMonthAsync(request.UserId, year, month, ct);
+        if (totalIncome == 0)
+            return Result<ExpenseResponse>.Failure(
+                DomainError.Conflict(
+                    $"No income recorded for {year}-{month:D2}. Expense creation is forbidden when total income is zero."));
+
+        var currentTotalExpenses = await _expenses.GetTotalForMonthAsync(request.UserId, year, month, ct);
+        var newTotalExpenses = currentTotalExpenses + request.Amount;
+        if (newTotalExpenses > totalIncome)
+            return Result<ExpenseResponse>.Failure(
+                DomainError.Conflict(
+                    $"Total expenses ({newTotalExpenses:F2}) would exceed total income ({totalIncome:F2}) for {year}-{month:D2}."));
 
         var expense = new Expense
         {

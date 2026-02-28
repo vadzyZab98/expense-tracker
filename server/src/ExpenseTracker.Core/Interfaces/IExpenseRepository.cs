@@ -9,4 +9,5 @@ public interface IExpenseRepository
     Task AddAsync(Expense expense, CancellationToken ct = default);
     void Update(Expense expense);
     void Delete(Expense expense);
+    Task<decimal> GetTotalForMonthAsync(int userId, int year, int month, CancellationToken ct = default);
 }

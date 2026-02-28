@@ -54,12 +54,12 @@ server/
 
 ### Core Layer (`ExpenseTracker.Core`)
 - **No dependencies** — pure C# only
-- `Entities/`: `User`, `Category`, `Expense` (with navigation properties)
-- `Interfaces/`: `IUserRepository`, `ICategoryRepository`, `IExpenseRepository`, `IUnitOfWork`
+- `Entities/`: `User`, `Category`, `Expense`, `IncomeCategory`, `Income`, `MonthlyBudget` (with navigation properties)
+- `Interfaces/`: `IUserRepository`, `ICategoryRepository`, `IExpenseRepository`, `IIncomeCategoryRepository`, `IIncomeRepository`, `IMonthlyBudgetRepository`, `IUnitOfWork`
 
 ### Logic Layer (`ExpenseTracker.Logic`)
 - References: **Core** only
-- `DTOs/`: `TokenResponse`, `CategoryResponse`, `ExpenseResponse`, `UserResponse`
+- `DTOs/`: `TokenResponse`, `CategoryResponse`, `ExpenseResponse`, `UserResponse`, `IncomeCategoryResponse`, `IncomeResponse`, `MonthlyBudgetResponse`
 - `Interfaces/`: `ITokenService`, `IPasswordService`
 - `Common/`: `Result`, `Result<T>`, `DomainError` (sealed record with ErrorCode), `ErrorCode` enum (NotFound, Conflict, Unauthorized)
 - CQRS pattern: command/query + handler + validator **co-located per operation**
@@ -69,10 +69,25 @@ server/
   - `Categories/UpdateCategory/`: command + handler + validator
   - `Categories/DeleteCategory/`: command + handler
   - `Categories/GetCategories/`: query + handler
-  - `Expenses/CreateExpense/`: command + handler + validator
-  - `Expenses/UpdateExpense/`: command + handler + validator
+  - `Expenses/CreateExpense/`: command + handler + validator (income constraint enforcement)
+  - `Expenses/UpdateExpense/`: command + handler + validator (income constraint enforcement)
   - `Expenses/DeleteExpense/`: command + handler
   - `Expenses/GetExpenses/`: query + handler
+  - `IncomeCategories/CreateIncomeCategory/`: command + handler + validator
+  - `IncomeCategories/UpdateIncomeCategory/`: command + handler + validator
+  - `IncomeCategories/DeleteIncomeCategory/`: command + handler (HasIncomes check)
+  - `IncomeCategories/GetIncomeCategories/`: query + handler
+  - `IncomeCategories/GetIncomeCategoryById/`: query + handler
+  - `Incomes/CreateIncome/`: command + handler + validator
+  - `Incomes/UpdateIncome/`: command + handler + validator (income modification guards)
+  - `Incomes/DeleteIncome/`: command + handler (income modification guards)
+  - `Incomes/GetIncomes/`: query + handler
+  - `Incomes/GetIncomeById/`: query + handler
+  - `Budgets/CreateBudget/`: command + handler + validator (income constraint enforcement)
+  - `Budgets/UpdateBudget/`: command + handler + validator (income constraint enforcement)
+  - `Budgets/DeleteBudget/`: command + handler
+  - `Budgets/GetBudgets/`: query + handler
+  - `Budgets/GetBudgetsByMonth/`: query + handler
   - `Users/GetUsers/`: query + handler
   - `Users/AssignRole/`: command + handler + validator
 - `Behaviors/ValidationBehavior.cs`: MediatR pipeline behavior — runs validators before handlers
@@ -81,7 +96,7 @@ server/
 ### Persistence Layer (`ExpenseTracker.Persistence`)
 - References: **Logic** + **Core**
 - `AppDbContext.cs`: EF Core context with `ApplyConfigurationsFromAssembly`
-- `Configurations/`: `UserConfiguration` (seeds SuperAdmin user), `CategoryConfiguration`, `ExpenseConfiguration` (IEntityTypeConfiguration)
+- `Configurations/`: `UserConfiguration` (seeds SuperAdmin user), `CategoryConfiguration`, `ExpenseConfiguration`, `IncomeCategoryConfiguration` (seeds 4 income categories), `IncomeConfiguration`, `MonthlyBudgetConfiguration` (IEntityTypeConfiguration)
 - `Repositories/`: implementations of Core repository interfaces
 - `Migrations/`: EF Core auto-generated migrations
 - `PersistenceServiceExtensions.cs`: `AddPersistence(IConfiguration)` registers DbContext, repos, UoW
@@ -113,19 +128,31 @@ When adding a new feature:
 
 ## Error Handling
 
-Domain exceptions are thrown in handlers and mapped to HTTP responses by `GlobalExceptionHandler`:
+Handlers return `Result` / `Result<T>` with `DomainError`. Controllers use `MapError()` to convert to HTTP responses:
 
-| Domain Exception | HTTP Status | 
-|------------------|-------------|
-| `NotFoundException` | 404 |
-| `EmailAlreadyInUseException` | 409 |
-| `InvalidCredentialsException` | 401 |
-| `CategoryHasExpensesException` | 409 |
-| `CannotChangeSuperAdminRole` | 409 |
-| `ValidationException` (FluentValidation) | 422 |
-| Unhandled exceptions | 500 |
+| ErrorCode      | HTTP Status |
+|----------------|-------------|
+| `NotFound`     | 404         |
+| `Conflict`     | 409         |
+| `Unauthorized` | 401         |
+
+`ValidationException` (FluentValidation) is caught by `GlobalExceptionHandler` → 422.
+Unhandled exceptions → 500.
 
 All error responses use RFC 7807 **ProblemDetails** format.
+
+### Financial Constraint Errors (409 Conflict)
+
+| Operation          | Rule                                                                                 |
+|--------------------|--------------------------------------------------------------------------------------|
+| Create Expense     | `totalExpenses(month) + amount ≤ totalIncome(month)`; rejected if income is zero      |
+| Update Expense     | Same check on target month when amount increases or month changes                     |
+| Create Budget      | `totalBudgets(month) + amount ≤ totalIncome(month)`; rejected if income is zero       |
+| Update Budget      | Same check on target month when amount increases or month changes                     |
+| Delete Income      | Rejected if `remainingIncome < totalBudgets(month)` or `< totalExpenses(month)`       |
+| Update Income      | If amount decreases or month changes: same guard on the old month                     |
+
+Equality is allowed (`total == income` is valid). Checks are per-month, no cross-month aggregation.
 
 ---
 

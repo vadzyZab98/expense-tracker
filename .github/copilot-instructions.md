@@ -78,6 +78,51 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | Description | string   | required         |
 | Date        | DateTime | required         |
 
+### IncomeCategory
+| Field | Type   | Notes                       |
+|-------|--------|-----------------------------|
+| Id    | int    | PK                          |
+| Name  | string | required, max 100           |
+| Color | string | hex color, max 7            |
+
+### Income
+| Field            | Type     | Notes                     |
+|------------------|----------|---------------------------|
+| Id               | int      | PK                        |
+| UserId           | int      | FK → User.Id              |
+| IncomeCategoryId | int      | FK → IncomeCategory.Id    |
+| Amount           | decimal  | required, > 0             |
+| Date             | DateTime | required                  |
+
+### MonthlyBudget
+| Field      | Type    | Notes                                          |
+|------------|---------|-------------------------------------------------|
+| Id         | int     | PK                                              |
+| UserId     | int     | FK → User.Id                                    |
+| CategoryId | int     | FK → Category.Id (expense category)             |
+| Year       | int     | required, 2000–2100                             |
+| Month      | int     | required, 1–12                                  |
+| Amount     | decimal | required, > 0                                   |
+
+Unique constraint: `(UserId, CategoryId, Year, Month)` on MonthlyBudget.
+
+---
+
+## Financial Constraints (Income Enforcement)
+
+Every month's budgets and expenses are bounded by the user's total income for that month.
+
+| Operation          | Rule                                                                                 | Error   |
+|--------------------|--------------------------------------------------------------------------------------|---------|
+| Create Expense     | `totalExpenses(month) + amount ≤ totalIncome(month)`; rejected if income is zero      | 409     |
+| Update Expense     | Same check on target month when amount increases or month changes                     | 409     |
+| Create Budget      | `totalBudgets(month) + amount ≤ totalIncome(month)`; rejected if income is zero       | 409     |
+| Update Budget      | Same check on target month when amount increases or month changes                     | 409     |
+| Delete Income      | Rejected if `remainingIncome < totalBudgets(month)` or `< totalExpenses(month)`       | 409     |
+| Update Income      | If amount decreases or month changes: same guard on the old month                     | 409     |
+
+Equality is allowed (`total == income` is valid). Checks are per-month only, no cross-month aggregation.
+
 ---
 
 ## API Contract
@@ -96,6 +141,8 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | PUT    | /api/expenses/{id} | `{ amount, description, date, categoryId }` | 204          |
 | DELETE | /api/expenses/{id} |                                            | 204          |
 
+Expense creation/update enforces income constraint: `totalExpenses(month) + amount ≤ totalIncome(month)`. Returns 409 if violated or if income is zero.
+
 ### Categories
 | Method | Endpoint             | Auth                  | Body              | Response     |
 |--------|----------------------|-----------------------|-------------------|--------------|
@@ -104,6 +151,37 @@ Error handling: **Result&lt;T&gt; pattern** (no domain exceptions). Handlers ret
 | POST   | /api/categories      | Admin or SuperAdmin   | `{ name, color }` | 201 + object |
 | PUT    | /api/categories/{id} | Admin or SuperAdmin   | `{ name, color }` | 204          |
 | DELETE | /api/categories/{id} | Admin or SuperAdmin   |                  | 204          |
+
+### Income Categories
+| Method | Endpoint                    | Auth                  | Body              | Response     |
+|--------|-----------------------------|-----------------------|-------------------|--------------|
+| GET    | /api/income-categories      | public                |                  | 200 + array  |
+| GET    | /api/income-categories/{id} | public                |                  | 200 + object |
+| POST   | /api/income-categories      | Admin or SuperAdmin   | `{ name, color }` | 201 + object |
+| PUT    | /api/income-categories/{id} | Admin or SuperAdmin   | `{ name, color }` | 204          |
+| DELETE | /api/income-categories/{id} | Admin or SuperAdmin   |                  | 204          |
+
+### Incomes  Bearer token required
+| Method | Endpoint          | Body                                     | Response     |
+|--------|-------------------|------------------------------------------|--------------|
+| GET    | /api/incomes      |                                         | 200 + array  |
+| GET    | /api/incomes/{id} |                                         | 200 + object |
+| POST   | /api/incomes      | `{ amount, date, incomeCategoryId }`     | 201 + object |
+| PUT    | /api/incomes/{id} | `{ amount, date, incomeCategoryId }`     | 204 or 409   |
+| DELETE | /api/incomes/{id} |                                         | 204 or 409   |
+
+Income update/delete enforces guards: reject if reducing/removing income would cause budgets or expenses to exceed remaining income.
+
+### Monthly Budgets  Bearer token required
+| Method | Endpoint                     | Body                                       | Response     |
+|--------|------------------------------|--------------------------------------------|--------------|
+| GET    | /api/budgets                 |                                           | 200 + array  |
+| GET    | /api/budgets?year=Y&month=M |                                           | 200 + array  |
+| POST   | /api/budgets                 | `{ categoryId, year, month, amount }`      | 201 + object |
+| PUT    | /api/budgets/{id}            | `{ categoryId, year, month, amount }`      | 204 or 409   |
+| DELETE | /api/budgets/{id}            |                                           | 204          |
+
+Budget creation/update enforces: `totalBudgets(month) + amount ≤ totalIncome(month)`. Returns 409 if violated or if income is zero.
 
 ### Users  SuperAdmin only
 | Method | Endpoint              | Body           | Response     |

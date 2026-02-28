@@ -10,6 +10,9 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<IncomeCategory> IncomeCategories => Set<IncomeCategory>();
+    public DbSet<Income> Incomes => Set<Income>();
+    public DbSet<MonthlyBudget> MonthlyBudgets => Set<MonthlyBudget>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
