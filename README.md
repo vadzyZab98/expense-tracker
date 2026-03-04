@@ -320,7 +320,7 @@ All 110 tests pass.
 
 ---
 
-### Step 21 — GET category by ID endpoint
+### Step 20 — GET category by ID endpoint
 **Agent:** GitHub Copilot
 **Prompt:**
 > Add a GET /api/categories/{id} endpoint.
@@ -330,7 +330,7 @@ All 110 tests pass.
 
 ---
 
-### Step 22 — Strict Monthly Income Enforcement
+### Step 21 — Strict Monthly Income Enforcement
 **Agent:** GitHub Copilot (backend-dev)
 **Prompt:**
 > Implement Strict Monthly Income Enforcement: IncomeCategory entity, Income CRUD (user-scoped), MonthlyBudget CRUD (user-scoped), constraint enforcement on expenses/budgets (total ≤ income), income modification guards (reject delete/reduce if would break budgets or expenses), zero-income rule (forbids budget and expense creation).
@@ -347,7 +347,7 @@ All 110 tests pass.
 
 ---
 
-### Step 23 — Income-Constrained Financial UI
+### Step 22 — Income-Constrained Financial UI
 **Agent:** GitHub Copilot (ui-dev)
 **Prompt:**
 > Implement UI for Income-based Monthly Financial Limits: Income page (CRUD + monthly filter + total), Budget page (budget/spent/% used + financial summary), Expense page (income/spent/remaining summary), limit behavior (disable creation when remaining=0, show 409 errors, highlight summary), admin CRUD for income categories.
@@ -372,7 +372,7 @@ All 110 tests pass.
 
 ---
 
-### Step 24 — Extract Yup schemas to co-located files
+### Step 23 — Extract Yup schemas to co-located files
 **Agent:** GitHub Copilot (ui-dev)
 **Prompt:**
 > Move all Yup schemas to separate files in co-located `schemas/` folders next to the pages that use them.
@@ -386,7 +386,7 @@ All 110 tests pass.
 
 **Accepted/Changed:** Accepted as-is.
 
-### Step 25 — Reorganize pages into feature-based folders
+### Step 24 — Reorganize pages into feature-based folders
 **Agent:** GitHub Copilot (ui-dev)
 **Prompt:**
 > Reorganize pages into feature-based folders where page, schema, and tests live together (e.g., `pages/income/` contains `IncomesTab.tsx`, `IncomeFormPage.tsx`, `incomeSchema.ts`).
@@ -422,10 +422,70 @@ The application enforces strict monthly income constraints on both expenses and 
 
 ---
 
-## Insights
+## MCP Servers & External Tools
 
-> *To be filled after project completion*
+No MCP servers or external tools were used. All code was generated using **GitHub Copilot Agent mode** (VS Code) with **Claude Sonnet 4.6**. The only external integrations were the built-in Copilot prompt files (`.github/prompts/*.prompt.md`) and the shared `copilot-instructions.md` context file.
 
-- Which prompts worked well?
-- Which prompts did not work, and why?
-- What patterns gave the best results?
+---
+
+## Running Tests
+
+### Backend
+```bash
+cd server
+dotnet test
+```
+~183 unit tests (xUnit + Moq + FluentAssertions) covering all CQRS handlers and FluentValidation validators.
+
+### Frontend
+```bash
+cd client/expense-tracker-ui
+npm run test
+```
+~30 Yup schema validation tests (Vitest + happy-dom).
+
+---
+
+## Insights & Recommendations
+
+### Prompts That Worked Well
+
+1. **"Plan first, then execute"** — Step 1 asked Copilot to *describe* the skeleton structure without generating code. This produced a clear plan that Step 2 could execute verbatim. Separating planning from implementation gave much better results than asking for both at once.
+
+2. **Explicit agent personas with prompt files** — Using `#backend-dev` and `#ui-dev` prompt files that defined the tech stack, naming conventions, and file-status tables kept Copilot focused. It never mixed React code into backend work or vice versa.
+
+3. **Architecture refactor via analysis prompt** — Step 13 started with "Analyse the BE part and suggest improvements according to best practices." Letting Copilot assess the codebase first, then asking it to implement the refactor, produced a clean Onion Architecture migration with zero API-breaking changes.
+
+4. **Co-located structure requests** — Prompts like "co-locate validators with their commands" (Step 14) and "move schemas next to pages that use them" (Step 24) worked perfectly because the instruction was unambiguous and structural.
+
+5. **Detailed constraint specifications** — Step 22 (Income Enforcement) listed every business rule in table form (operation → rule → error code). This precise spec produced correct guard logic on the first attempt across 15 CQRS operations.
+
+### Prompts That Did Not Work Well
+
+1. **Broad "implement everything" prompts** — Early attempts to implement multiple controllers in a single prompt (Step 9: expenses + categories together) worked but produced less consistent code than single-responsibility prompts. Later steps focused on one domain at a time.
+
+2. **NuGet version assumptions** — Step 2 required manual `--version 8.0.*` flags because Copilot defaulted to the latest .NET 10 packages. AI tools don't always know which package versions are compatible with the target framework.
+
+3. **Implicit test relocation** — When reorganizing pages into feature folders (Step 24–25), test files in the old `__tests__/` directories were not automatically cleaned up, leaving duplicate files behind. Prompts should explicitly state "delete the old files after moving."
+
+### Patterns That Gave the Best Results
+
+1. **Shared context file (`copilot-instructions.md`)** — Maintaining a single source of truth for data models, API contracts, and roles meant every prompt had consistent context. When the schema changed (e.g., adding Income/Budget entities in Step 22), updating this file once propagated the knowledge to all future prompts.
+
+2. **Incremental delivery with verification** — Each step ended with a build/test verification ("Build succeeded", "All 110 tests pass"). This caught issues early and kept the codebase in a working state throughout the 24-step journey.
+
+3. **Refactor-then-extend** — Steps 13–14 (Onion + Result pattern) restructured the backend *before* adding new features (Steps 20–22). This meant new features landed on clean architecture rather than accumulating tech debt.
+
+4. **Analysis-first prompts for large changes** — "Analyse the UI part of the application" (Step 16) produced a comprehensive refactoring plan (removing 75 inline styles, 3× duplicated interfaces, scattered API calls) that a direct "refactor the frontend" prompt would have missed.
+
+5. **Domain-specific test agents** — Separate prompt files for backend tests (`#backend-test`) and frontend tests (`#test-dev`) ensured each agent knew the correct testing stack (xUnit vs. Vitest) and conventions (handler tests vs. schema validation tests).
+
+### Recommendations for Future Copilot Use
+
+- **Invest in `copilot-instructions.md` early** — it pays compound returns as the project grows.
+- **Use prompt files as reusable agent personas** — they eliminate repetitive context in every prompt.
+- **Ask for a plan before implementation** — review the plan, then ask for execution.
+- **Verify after every step** — run build + tests before moving on.
+- **Be explicit about file cleanup** — when restructuring, explicitly ask to remove old files.
+- **Specify package versions** — don't let the AI guess compatible versions.
+- **One concern per prompt** — single-responsibility prompts produce more reliable output than multi-concern prompts.
